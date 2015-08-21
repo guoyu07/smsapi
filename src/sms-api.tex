@@ -1,0 +1,272 @@
+% !TEX TS-program = xelatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{book} % use larger type; default would be 10pt
+
+\usepackage{ctex}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\usepackage{upgreek}
+\usepackage{xltxtra}
+
+\usepackage{geometry}
+
+\usepackage{paralist}
+
+
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+\usepackage{makeidx}
+
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+\usepackage[colorlinks=true,linkcolor=blue]{hyperref}
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+\usepackage{longtable}
+
+\usepackage{color}
+\definecolor{pblue}{rgb}{0.13,0.13,1}
+\definecolor{pgreen}{rgb}{0,0.5,0}
+\definecolor{pred}{rgb}{0.9,0,0}
+\definecolor{pgrey}{rgb}{0.46,0.45,0.48}
+
+
+
+\usepackage{listings}
+\lstset{% Global setting
+    %language=XX,
+    xleftmargin=2em,
+    backgroundcolor=\color{white},
+    basicstyle=\ttfamily,
+    keywordstyle=\bfseries,
+    commentstyle=\rmfamily\itshape,
+    stringstyle=\color{pred}\ttfamily,
+    flexiblecolumns,
+    showspaces=false,
+    showtabs=false,
+    breaklines=true,
+    showstringspaces=false,
+    breakatwhitespace=true,
+    tabsize=2,
+    commentstyle=\color{pgreen}
+    %numbers=left,
+    %numberstyle=\footnotesize  
+}
+
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+\newcommand\mgape[1]{\gape{$\vcenter{\hbox{#1}}$}}
+
+
+\setmainfont{Minion Pro}
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+\makeindex
+
+\title{短信管理系统}
+\author{张国玉~~zgy@bz-inc.com}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\maketitle
+%\makeindex
+\tableofcontents
+\listoffigures
+\listoftables
+\printindex
+
+
+
+
+\part{互联网短信网关接口协议}
+
+\begin{center}
+\textbf{\huge 中国移动通信互联网短信网关接口协议}\\ \bigskip \bigskip \bigskip {\Large （China Mobile Peer to Peer, CMPP）} \\ {\large（V2.0）} \bigskip \\ \bigskip 2002年4月\\ \vfill 中国移动通信集团公司
+\end{center}
+
+\chapter{前言}
+
+本规范为中国移动通信集团公司企业规范，简称CMPP，现阶段版本是对1.2.1版修订后形成的，为2.0版。
+
+本规范描述了中国移动短信业务中各网元（包括ISMG、GNS和SP）之间的相关消息的类型和定义。根据业务的发展，规范中的信令操作和参数将会做进一步的调整和增加。
+
+本规范解释权属于中国移动通信集团公司。
+
+本规范起草单位：中国移动通信集团公司研发中心。
+
+
+\chapter{范围}
+
+本规范规定了以下三方面的内容：
+
+\begin{compactenum}
+\item 信息资源站实体与互联网短信网关之间的接口协议；
+\item 互联网短信网关之间的接口协议；
+\item 互联网短信网关与汇接网关之间的接口协议。
+\end{compactenum}
+
+
+\chapter{缩略语}
+
+\begin{longtable}{|m{50pt}|m{140pt}|m{200pt}|}
+
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+英文缩写 & 英文全称 & 说明
+\endhead
+
+\caption{缩略语}\\
+\hline
+英文缩写 & 英文全称 & 说明
+\endfirsthead
+
+\multicolumn{3}{r}{}
+\endfoot
+
+\endlastfoot
+
+\hline
+ISMG& Internet Short Message Gateway & 互联网短信网关\\
+\hline
+SMPP&Short Message Peer to Peer & 短消息点对点协议\\
+\hline
+CMPP&China Mobile Peer to Peer& 中国移动点对点协议\\
+\hline
+SMC&Short Message Center&短消息中心\\
+\hline
+GNS&Gateway Name Server& 网关名称服务器（汇接网关）\\
+\hline
+SP&Service Provider& 业务提供者，即信息资源站实体\\
+\hline
+SMC&Short Message Control&SP为收取包月业务费用而向网关发送的消息，网关收到后不送给用户仅产生相应的话单；\\
+\hline
+ISMG\_Id& &网关代码：0XYZ01～0XYZ99，其中XYZ为省会区号，位数不足时左补零，如北京编号为1的网关代码为001001，江西编号为1的网关代码为079101，依此类推。\\
+\hline
+SP\_Id& & SP的企业代码：网络中SP地址和身份的标识、地址翻译、计费、结算等均以企业代码为依据。企业代码以数字表示，共6位，从“9XY000”至“9XY999”，其中“XY”为各移动公司代码。\\
+\hline
+SP\_Code & & SP的服务代码：服务代码是在使用短信方式的点播类业务中，提供给用户点播的内容/应用服务提供商代码。服务代码以数字表示，全国业务服务代码长度统一为 4 位，即“1000”－“9999”；本地业务服务代码长度统一为5 位，即  “01000”－“09999”。\\
+\hline
+Service\_Id &  & SP的业务类型，数字、字母和符号的 组合，由SP自定，如图片传情可定为TPCQ，股票查询可定义为11。\\
+\hline
+\end{longtable}
+
+
+\chapter{网络结构}
+\chapter{CMPP功能概述}
+\chapter{协议栈}
+\chapter{通信方式}
+\section{长连接}
+\section{短连接}
+\section{本协议中涉及的端口号}
+\section{交互过程中的应答方式}
+\chapter{消息定义}
+\section{基本数据类型}
+\section{消息结构}
+\section{消息头格式（Message Header）}
+\section{信息资源站实体(SP)与互联网短信网关(ISMG)间的消息定义}
+\subsection{SP请求连接到ISMG（CMPP\_CONNECT）操作	}
+\subsubsection{CMPP\_CONNECT消息定义（SP\textrightarrow ISMG）}
+\subsubsection{CMPP\_CONNECT\_RESP消息定义（ISMG\textrightarrow SP）}
+\subsection{SP或ISMG请求拆除连接（CMPP\_TERMINATE）操作}
+\subsubsection{CMPP\_TERMINATE消息定义（SPISMG或ISMG\textrightarrow SP）}
+\subsubsection{CMPP\_TERMINATE\_RESP消息定义（SPISMG或ISMG\textrightarrow SP）}
+\subsection{SP向ISMG提交短信（CMPP\_SUBMIT）操作}
+\subsubsection{CMPP\_SUBMIT消息定义（SPISMG）}
+\subsubsection{CMPP\_SUBMIT\_RESP消息定义（ISMG\textrightarrow SP）}
+\subsection{SP向ISMG查询发送短信状态（CMPP\_QUERY）操作}
+\subsubsection{CMPP\_QUERY消息的定义（SP\textrightarrow ISMG）}
+\subsubsection{CMPP\_QUERY\_RESP消息的定义（ISMG\textrightarrow SP）}
+\subsection{ISMG向SP送交短信（CMPP\_DELIVER）操作}
+\subsubsection{CMPP\_DELIVER消息定义（ISMG\textrightarrow SP）}
+\subsubsection{CMPP\_DELIVER\_RESP消息定义（SP\textrightarrow ISMG）}
+\subsection{SP向ISMG发起删除短信（CMPP\_CANCEL）操作}
+\subsubsection{CMPP\_CANCEL消息定义（SP\textrightarrow ISMG）}
+\subsubsection{CMPP\_CANCEL\_RESP消息定义（ISMG\textrightarrow SP）}
+\subsection{链路检测（CMPP\_ACTIVE\_TEST）操作}
+\subsubsection{CMPP\_ACTIVE\_TEST定义（SP\textrightarrow ISMG或ISMG\textrightarrow SP）}
+\subsubsection{CMPP\_ACTIVE\_TEST\_RESP定义（SP\textrightarrow ISMG或ISMG\textrightarrow SP）}
+\section{互联网短信网关(ISMG)之间的消息定义}
+\subsection{源ISMG请求连接到目的ISMG（CMPP\_CONNECT）操作}
+\subsection{源ISMG请求拆除到目的ISMG的连接（CMPP\_TERMINATE）操作}
+
+\subsection{链路检测（CMPP\_ACTIVE\_TEST）操作}
+\subsection{源ISMG向目的ISMG转发短信（CMPP\_FWD）操作}
+\subsubsection{CMPP\_FWD定义（ISMG ISMG）}
+\subsubsection{CMPP\_FWD\_RESP定义（ISMG ISMG）}
+\section{互联网短信网关(ISMG)与汇接网关(GNS)之间的消息定义}
+\subsection{ISMG请求连接到GNS或GNS请求连接到ISMG（CMPP\_CONNECT）操作}
+\subsection{ISMG请求拆除到GNS的连接或GNS请求拆除到ISMG的连接（CMPP\_TERMINATE）操作}
+\subsection{ISMG向汇接网关查询MT路由（CMPP\_MT\_ROUTE）操作}
+\subsubsection{CMPP\_MT\_ROUTE消息定义（ISMGGNS）}
+\subsubsection{CMPP\_MT\_ROUTE\_RESP消息定义（GNS\textrightarrow ISMG）}
+\subsection{ISMG向汇接网关查询MO路由（CMPP\_MO\_ROUTE）操作}
+\subsubsection{CMPP\_MO\_ROUTE消息定义（ISMGGNS）}
+\subsubsection{CMPP\_MO\_ROUTE\_RESP消息定义（GNS\textrightarrow ISMG）}
+\subsection{ISMG向汇接网关获取路由（CMPP\_GET\_ROUTE）操作}
+\subsubsection{CMPP\_GET\_ ROUTE消息定义（ISMG\textrightarrow GNS）}
+\subsubsection{CMPP\_GET\_ ROUTE\_RESP消息定义（GNS\textrightarrow ISMG）}
+\subsection{ISMG向汇接网关更新MT路由（CMPP\_MT\_ROUTE\_UPDATE）操作}
+\subsubsection{CMPP\_MT\_ROUTE\_UPDATE消息定义（ISMGGNS）}
+\subsubsection{CMPP\_MT\_ROUTE\_UPDATE\_RESP消息定义（GNS\textrightarrow ISMG）}
+\subsection{ISMG向汇接网关更新MO路由（CMPP\_MO\_ROUTE\_UPDATE）操作}
+\subsubsection{CMPP\_MO\_ROUTE\_UPDATE消息定义（ISMGGNS）}
+\subsubsection{CMPP\_MO\_ROUTE\_UPDATE\_RESP消息定义（GNS\textrightarrow ISMG）}
+\subsection{汇接网关向ISMG更新MT路由（CMPP\_PUSH\_MT\_ROUTE\_UPDATE）操作}
+\subsubsection{CMPP\_PUSH\_MT\_ROUTE\_UPDATE消息定义（GNS\textrightarrow ISMG）}
+\subsubsection{CMPP\_PUSH\_MT\_ROUTE\_UPDATE\_RESP消息定义（ISMG\textrightarrow GNS）}
+\subsection{汇接网关向ISMG更新MO路由（CMPP\_PUSH\_MO\_ROUTE\_UPDATE）操作}
+\subsubsection{CMPP\_PUSH\_MO\_ROUTE\_UPDATE消息定义（GNS\textrightarrow ISMG）}
+\subsubsection{CMPP\_PUSH\_MO\_ROUTE\_UPDATE\_RESP消息定义（ISMG\textrightarrow GNS）}
+\section{系统定义}
+\subsection{Command\_Id定义}
+\section{MO状态报告的产生}
+\section{修订历史}
+
+
+
+\end{document}
