@@ -197,26 +197,221 @@ Service\_Id &  & SP的业务类型，数字、字母和符号的 组合，由SP�
 
 
 \chapter{网络结构}
+
+
+如图1所示，互联网短信网关（ISMG）是外部信息资源站实体（SP）与移动网内短信中心之间的中介实体，互联网短信网关一方面负责接收SP发送给移动用户的信息和提交给短信中心。另一方面，移动用户点播SP业务的信息将由短信中心通过互联网短信网关发给SP。
+
+另外，为了减轻短信中心的信令负荷，互联网短信网关还应根据路由原则将SP提交的信息转发到相应的互联网短信网关。互联网短信网关通过向汇接网关（GNS）查询的方式获得网关间的转发路由信息。
+
+
 \chapter{CMPP功能概述}
+
+CMPP协议主要提供以下两类业务操作：
+
+\begin{compactenum}
+\item 短信发送（Short Message Mobile Originate，SM MO）
+
+典型的业务操作举例如图2所示：
+
+\begin{compactenum}[1)]
+\item 手机发出数据请求（可能是订阅信息或图片点播等），被源ISMG接收；
+\item 源ISMG对接收到的信息返回响应；
+\item 源ISMG在本地查询不到要连接的SP，向GNS(汇接网关)发路由请求信息；
+\item GNS将路由信息返回；
+\item 源ISMG根据路由信息将请求前转给目的ISMG；
+\item 目的ISMG对接收到的信息返回响应；
+\item 目的ISMG将请求信息送SP
+\item SP返回响应；
+\end{compactenum}
+
+在以上操作中，步骤3到步骤8均使用CMPP协议；
+
+在随后的操作中，目的ISMG在接收到SP的响应后将产生MO状态报告发给源ISMG。
+
+
+\item 短信接收（Short Message Mobile Terminated，SM MT）
+
+典型的业务操作举例如图3所示：
+
+\begin{compactenum}[1)]
+\item SP发出数据请求（可能是短信通知或手机铃声等），被源ISMG接收；
+\item 源ISMG对接收到的信息返回响应；
+\item 源ISMG在本地数据库中找不到要目的手机号段所对应网关代码，向GNS（汇接网关）发路由请求信息；
+\item 汇接网关将路由信息返回；
+\item 源ISMG根据路由信息将请求前转给目的ISMG；
+\item 目的ISMG对接收到的信息返回响应；
+\item 目的ISMG将请求信息发送至SMC；
+\item SMC向目的ISMG返回响应；
+\end{compactenum}
+
+在上述操作中，步骤1到步骤6均使用CMPP协议；
+
+在随后的操作中，SMC将通过NO.7信令网向移动用户发送信息，移动用户收到后将返回状态报告（Delivery-Receipt）给短信中心，短信中心将按照MO操作的流程将状态报告返回给SP（如果SP要求返回状态报告）。
+
+\end{compactenum}
+
+
 \chapter{协议栈}
+
+CMPP协议以TCP/IP作为底层通信承载，具体结构由图4所示：
+
+
 \chapter{通信方式}
+
+SP与ISMG之间、ISMG之间进行信息交互时，可以采用长连接方式，也可以采用短连接方式。
+
+\begin{compactitem}
+\item 所谓长连接，指在一个TCP连接上可以连续发送多个数据包，在TCP连接保持期间，如果没有数据包发送，需要双方发链路检测包以维持此连接。
+
+\item 所谓短连接是指通信双方有数据交互时，就建立一个TCP连接，数据发送完成后，则断开此TCP连接，即每次TCP连接只完成一对CMPP消息的发送。
+
+\end{compactitem}
+
+
+
+
 \section{长连接}
+
+通信双方以客户-服务器方式建立TCP连接，用于双方信息的相互提交。当信道上没有数据传输时，通信双方应每隔时间C发送链路检测包以维持此连接，当链路检测包发出超过时间T后未收到响应，应立即再发送链路检测包，再连续发送N-1次后仍未得到响应则断开此连接。
+
+参数C、T、N原则上应可配置，现阶段建议取值为：C=3分钟，T=60秒，N=3。
+    
+网关与SP之间、网关之间的消息发送后等待T秒后未收到响应，应立即重发，再连续发送N-1次后仍未得到响应则停发。
+
+现阶段建议取值为：T=60秒，N=3。
+    
+消息采用并发方式发送，加以滑动窗口流量控制，窗口大小参数W可配置，现阶段建议为16，即接收方在应答前一次收到的消息最多不超过16条。
+
+长连接的操作流程举例如图5所示：
 \section{短连接}
+
+通信双方以客户-服务器方式建立TCP连接，应答与请求在同一个连接中完成。系统采用客户/服务器模式，操作以客户端驱动方式发起连接请求，完成一次操作后关闭此连接。
+
+网关与SP之间、网关之间的消息发送后等待T秒后未收到响应，应立即重发，再连续发送N-1次后仍未得到响应则停发。
+
+现阶段建议取值为：T=60秒，N=3。
+    
+短连接的操作流程举例如图6所示：
+
+
+
 \section{本协议中涉及的端口号}
+
+\begin{table}[htbp]
+\centering
+\caption{CMPP端口号}
+\begin{tabular}{|l|l|}
+\hline
+端口号 & 应用\\
+\hline
+7890&长连接（SP与网关间）\\
+\hline
+7900 &短连接（SP与网关间或网关之间）\\
+\hline
+7930&长连接（网关之间）\\
+\hline
+9168&短连接（短信网关与汇接网关之间）\\
+\hline
+\end{tabular}
+\end{table}
+
+
 \section{交互过程中的应答方式}
+
+在SP与ISMG之间、SMC与ISMG之间及ISMG之间的交互过程中均采用异步方式，即任一个网元在收到请求消息后应立即回送响应消息。举例如图7所示： 
+
+
+
 \chapter{消息定义}
+
 \section{基本数据类型}
+
+\begin{table}[htbp]
+\centering
+\caption{基本数据类型}
+\begin{tabular}{|m{80pt}|m{250pt}|}
+\hline
+Unsigned Integer&无符号整数\\
+\hline
+Integer&整数，可为正整数、负整数或零\\
+\hline
+Octet String&定长字符串，位数不足时，如果左补0则补ASCII表示的零，如果右补0则补二进制的零\\
+\hline
+\end{tabular}
+\end{table}
+
+
 \section{消息结构}
+
+\begin{table}[htbp]
+\centering
+\caption{消息结构}
+\begin{tabular}{|m{80pt}|m{250pt}|}
+\hline
+项目 &说明\\
+\hline
+Message Header& 消息头(所有消息公共包头)\\
+\hline
+Message Body& 消息体\\
+\hline
+\end{tabular}
+\end{table}
+
+
 \section{消息头格式（Message Header）}
+
+
+\begin{table}[htbp]
+\centering
+\caption{消息头格式}
+\begin{tabular}{|m{60pt}|m{40pt}|m{85pt}|m{120pt}|}
+\hline
+字段名 & 字节数& 类型& 描述\\
+\hline
+Total\_Length	& 4 & Unsigned  Integer& 消息总长度(含消息头及消息体)\\
+\hline
+Command\_Id & 4 & Unsigned Integer & 命令或响应类型 \\
+\hline
+Sequence\_Id& 4 & Unsigned Integer& 消息流水号,顺序累加,步长为1,循环使用（一对请求和应答消息的流水号必须相同）\\
+\hline
+\end{tabular}
+\end{table}
+
+
+
+
 \section{信息资源站实体(SP)与互联网短信网关(ISMG)间的消息定义}
+
+SP与ISMG之间互为客户/服务器，但要求SP首先以客户的身份请求连接到ISMG，之后SP与ISMG之间方可进行数据传输。
+
+
 \subsection{SP请求连接到ISMG（CMPP\_CONNECT）操作	}
+
+
+CMPP\_CONNECT操作的目的是SP向ISMG注册作为一个合法SP身份，若注册成功后即建立了应用层的连接，此后SP可以通过此ISMG接收和发送短信。
+
+ISMG以CMPP\_CONNECT\_RESP消息响应SP的请求。
+
+\begin{longtable}{|m{40pt}|m{30pt}|m{80pt}|m{150pt}|}
+
+
+
+\end{longtable}
+
 \subsubsection{CMPP\_CONNECT消息定义（SP\textrightarrow ISMG）}
+
+
+
+
+
 \subsubsection{CMPP\_CONNECT\_RESP消息定义（ISMG\textrightarrow SP）}
+
+
 \subsection{SP或ISMG请求拆除连接（CMPP\_TERMINATE）操作}
-\subsubsection{CMPP\_TERMINATE消息定义（SPISMG或ISMG\textrightarrow SP）}
-\subsubsection{CMPP\_TERMINATE\_RESP消息定义（SPISMG或ISMG\textrightarrow SP）}
+\subsubsection{CMPP\_TERMINATE消息定义（SP\textrightarrow ISMG或ISMG\textrightarrow SP）}
+\subsubsection{CMPP\_TERMINATE\_RESP消息定义（SP\textrightarrow ISMG或ISMG\textrightarrow SP）}
 \subsection{SP向ISMG提交短信（CMPP\_SUBMIT）操作}
-\subsubsection{CMPP\_SUBMIT消息定义（SPISMG）}
+\subsubsection{CMPP\_SUBMIT消息定义（SP\textrightarrow ISMG）}
 \subsubsection{CMPP\_SUBMIT\_RESP消息定义（ISMG\textrightarrow SP）}
 \subsection{SP向ISMG查询发送短信状态（CMPP\_QUERY）操作}
 \subsubsection{CMPP\_QUERY消息的定义（SP\textrightarrow ISMG）}
@@ -236,25 +431,25 @@ Service\_Id &  & SP的业务类型，数字、字母和符号的 组合，由SP�
 
 \subsection{链路检测（CMPP\_ACTIVE\_TEST）操作}
 \subsection{源ISMG向目的ISMG转发短信（CMPP\_FWD）操作}
-\subsubsection{CMPP\_FWD定义（ISMG ISMG）}
-\subsubsection{CMPP\_FWD\_RESP定义（ISMG ISMG）}
+\subsubsection{CMPP\_FWD定义（ISMG\textrightarrow ISMG）}
+\subsubsection{CMPP\_FWD\_RESP定义（ISMG\textrightarrow ISMG）}
 \section{互联网短信网关(ISMG)与汇接网关(GNS)之间的消息定义}
 \subsection{ISMG请求连接到GNS或GNS请求连接到ISMG（CMPP\_CONNECT）操作}
 \subsection{ISMG请求拆除到GNS的连接或GNS请求拆除到ISMG的连接（CMPP\_TERMINATE）操作}
 \subsection{ISMG向汇接网关查询MT路由（CMPP\_MT\_ROUTE）操作}
-\subsubsection{CMPP\_MT\_ROUTE消息定义（ISMGGNS）}
+\subsubsection{CMPP\_MT\_ROUTE消息定义（ISMG\textrightarrow GNS）}
 \subsubsection{CMPP\_MT\_ROUTE\_RESP消息定义（GNS\textrightarrow ISMG）}
 \subsection{ISMG向汇接网关查询MO路由（CMPP\_MO\_ROUTE）操作}
-\subsubsection{CMPP\_MO\_ROUTE消息定义（ISMGGNS）}
+\subsubsection{CMPP\_MO\_ROUTE消息定义（ISMG\textrightarrow GNS）}
 \subsubsection{CMPP\_MO\_ROUTE\_RESP消息定义（GNS\textrightarrow ISMG）}
 \subsection{ISMG向汇接网关获取路由（CMPP\_GET\_ROUTE）操作}
 \subsubsection{CMPP\_GET\_ ROUTE消息定义（ISMG\textrightarrow GNS）}
 \subsubsection{CMPP\_GET\_ ROUTE\_RESP消息定义（GNS\textrightarrow ISMG）}
 \subsection{ISMG向汇接网关更新MT路由（CMPP\_MT\_ROUTE\_UPDATE）操作}
-\subsubsection{CMPP\_MT\_ROUTE\_UPDATE消息定义（ISMGGNS）}
+\subsubsection{CMPP\_MT\_ROUTE\_UPDATE消息定义（ISMG\textrightarrow GNS）}
 \subsubsection{CMPP\_MT\_ROUTE\_UPDATE\_RESP消息定义（GNS\textrightarrow ISMG）}
 \subsection{ISMG向汇接网关更新MO路由（CMPP\_MO\_ROUTE\_UPDATE）操作}
-\subsubsection{CMPP\_MO\_ROUTE\_UPDATE消息定义（ISMGGNS）}
+\subsubsection{CMPP\_MO\_ROUTE\_UPDATE消息定义（ISMG\textrightarrow GNS）}
 \subsubsection{CMPP\_MO\_ROUTE\_UPDATE\_RESP消息定义（GNS\textrightarrow ISMG）}
 \subsection{汇接网关向ISMG更新MT路由（CMPP\_PUSH\_MT\_ROUTE\_UPDATE）操作}
 \subsubsection{CMPP\_PUSH\_MT\_ROUTE\_UPDATE消息定义（GNS\textrightarrow ISMG）}
