@@ -363,7 +363,7 @@ Message Body& 消息体\\
 
 \begin{table}[htbp]
 \centering
-\caption{消息头格式}
+\caption{消息头格式（Message Header）}
 \begin{tabular}{|m{60pt}|m{40pt}|m{85pt}|m{120pt}|}
 \hline
 字段名 & 字节数& 类型& 描述\\
@@ -392,75 +392,2494 @@ CMPP\_CONNECT操作的目的是SP向ISMG注册作为一个合法SP身份，若�
 
 ISMG以CMPP\_CONNECT\_RESP消息响应SP的请求。
 
-\begin{longtable}{|m{40pt}|m{30pt}|m{80pt}|m{150pt}|}
-
-
-
-\end{longtable}
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
 
 \subsubsection{CMPP\_CONNECT消息定义（SP\textrightarrow ISMG）}
 
 
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_CONNECT消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Source\_Addr&6&Octet String&源地址，此处为SP\_Id，即SP的企业代码。\\
+\hline
+AuthenticatorSource&16 & Octet String& 用于鉴别源地址。其值通过单向MD5 hash计算得出，表示如下：\newline 
+AuthenticatorSource = MD5（Source\_Addr+9 字节的0 +shared secret+timestamp）\newline 
+Shared secret 由中国移动与源地址实体事先商定。\newline timestamp格式为：MMDDHHMMSS，即月日时分秒，10位。\\
+\hline
+Version & 1 & Unsigned Integer& 双方协商的版本号(高位4bit表示主版本号,低位4bit表示次版本号)\\
+\hline
+Timestamp& 4 & Unsigned Integer& 时间戳的明文,由客户端产生,格式为MMDDHHMMSS，即月日时分秒，10位数字的整型，右对齐 。\\
+\hline
+\end{longtable}
 
 
 
 \subsubsection{CMPP\_CONNECT\_RESP消息定义（ISMG\textrightarrow SP）}
 
 
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_CONNECT\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Status&1&Unsigned Integer&状态\newline 0：正确\newline 1：消息结构错\newline  2：非法源地址\newline  3：认证错\newline  4：版本太高\newline   5$\sim$ ：其他错误\\
+\hline
+AuthenticatorISMG& 16& Octet String& ISMG认证码，用于鉴别ISMG。\newline 其值通过单向MD5 hash计算得出，表示如下：\newline 
+AuthenticatorISMG=MD5（Status+AuthenticatorSource+shared secret），Shared secret 由中国移动与源地址实体事先商定，AuthenticatorSource为源地址实体发送给ISMG的对应消息CMPP\_Connect中的值。\newline 认证出错时，此项为空。\\
+\hline
+Version& 1& Unsigned Integer& 服务器支持的最高版本号\\
+\hline
+\end{longtable}
+
 \subsection{SP或ISMG请求拆除连接（CMPP\_TERMINATE）操作}
+
+CMPP\_TERMINATE操作的目的是SP或ISMG基于某些原因决定拆除当前的应用层连接而发起的操作。此操作完成后SP与ISMG之间的应用层连接被释放，此后SP若再要与ISMG通信时应发起CMPP\_CONNECT操作。
+
+ISMG或SP以CMPP\_TERMINATE\_RESP消息响应请求。
+
+
 \subsubsection{CMPP\_TERMINATE消息定义（SP\textrightarrow ISMG或ISMG\textrightarrow SP）}
+
+无消息体。
+
+
 \subsubsection{CMPP\_TERMINATE\_RESP消息定义（SP\textrightarrow ISMG或ISMG\textrightarrow SP）}
+
+无消息体。
+
+
 \subsection{SP向ISMG提交短信（CMPP\_SUBMIT）操作}
+
+CMPP\_SUBMIT操作的目的是SP在与ISMG建立应用层连接后向ISMG提交短信。
+
+ISMG以CMPP\_SUBMIT\_RESP消息响应。
+
+
 \subsubsection{CMPP\_SUBMIT消息定义（SP\textrightarrow ISMG）}
+
+
+\begin{longtable}{|m{90pt}|m{60pt}|m{75pt}|m{180pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_SUBMIT消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Msg\_Id&8&Unsigned Integer&信息标识，由SP侧短信网关本身产生，本处填空。\\
+\hline
+Pk\_total&1&Unsigned Integer&相同Msg\_Id的信息总条数，从1开始\\
+\hline
+Pk\_number&1&Unsigned Integer&相同Msg\_Id的信息序号，从1开始\\
+\hline
+Registered\_Delivery&1&Unsigned Integer&是否要求返回状态确认报告：\newline 0：不需要\newline 1：需要\newline 2：产生SMC话单\newline （该类型短信仅供网关计费使用，不发送给目的终端)\\
+\hline
+Msg\_level&1&Unsigned Integer&信息级别\\
+\hline
+Service\_Id&10&Octet String&业务类型，是数字、字母和符号的组合。\\
+\hline
+Fee\_UserType&1&Unsigned Integer&计费用户类型字段\newline 0：对目的终端MSISDN计费；\newline 1：对源终端MSISDN计费；\newline 2：对SP计费;\newline 3：表示本字段无效，对谁计费参见Fee\_terminal\_Id字段。\\
+\hline
+Fee\_terminal\_Id& 21&Unsigned Integer&被计费用户的号码（如本字节填空，则表示本字段无效，对谁计费参见Fee\_UserType字段，本字段与Fee\_UserType字段互斥）\\
+\hline
+TP\_pId&1&Unsigned Integer&GSM协议类型。详细是解释请参考GSM03.40中的9.2.3.9\\
+\hline
+TP\_udhi&1& Unsigned Integer&GSM协议类型。详细是解释请参考GSM03.40中的9.2.3.23,仅使用1位，右对齐\\
+\hline
+Msg\_Fmt& 1& Unsigned Integer& 信息格式\newline 0：ASCII串\newline   3：短信写卡操作\newline   4：二进制信息\newline 8：UCS2编码\newline 15：含GB汉字...\\
+\hline
+Msg\_src&6&Octet String&信息内容来源(SP\_Id)\\
+\hline
+FeeType&2&Octet String&资费类别 \newline 01：对“计费用户号码”免费\newline 02：对“计费用户号码”按条计信息费\newline 03：对“计费用户号码”按包月收取信息费\newline 04：对“计费用户号码”的信息费封顶\newline 05：对“计费用户号码”的收费是由SP实现\\
+\hline
+FeeCode&6&Octet String&资费代码（以分为单位）\\
+\hline
+ValId\_Time&17& Octet String& 存活有效期，格式遵循SMPP3.3协议\\
+\hline
+At\_Time&17&Octet String&定时发送时间，格式遵循SMPP3.3协议\\
+\hline
+Src\_Id&21&Octet String&源号码\newline SP的服务代码或前缀为服务代码的长号码, 网关将该号码完整的填到SMPP协议Submit\_SM消息相应的source\_addr字段，该号码最终在用户手机上显示为短消息的主叫号码\\
+\hline
+DestUsr\_tl& 1 & Unsigned Integer&接收信息的用户数量(小于100个用户)\\
+\hline
+Dest\_terminal\_Id&21*DestUsr\_tl&Octet String&接收短信的MSISDN号码\\
+\hline
+Msg\_Length&1&Unsigned Integer&信息长度(Msg\_Fmt值为0时：<160个字节；其它<=140个字节)\\
+\hline
+Msg\_Content&Msg\_length&Octet String&信息内容\\
+\hline
+Reserve&8&Octet String&保留\\
+\hline
+\end{longtable}
+
+
+注意：关于短信群发的问题，若SP对于群发消息不要求状态报告的回送时，才可以考虑群发，否则必须逐条发送。
+
 \subsubsection{CMPP\_SUBMIT\_RESP消息定义（ISMG\textrightarrow SP）}
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP­\_SUBMIT\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Msg\_Id&8&Unsigned Integer&信息标识，生成算法如下：\newline 
+采用64位（8字节）的整数：\newline 
+（1） 时间（格式为MMDDHHMMSS，即月日时分秒）：bit64$\sim$bit39，其中\newline 
+bit64$\sim$bit61：月份的二进制表示；\newline 
+bit60$\sim$bit56：日的二进制表示；\newline 
+bit55$\sim$bit51：小时的二进制表示；\newline 
+bit50$\sim$bit45：分的二进制表示；\newline 
+bit44$\sim$bit39：秒的二进制表示；\newline 
+（2） 短信网关代码：bit38$\sim$bit17，把短信网关的代码转换为整数填写到该字段中。\newline 
+（3） 序列号：bit16$\sim$bit1，顺序增加，步长为1，循环使用。\newline 
+各部分如不能填满，左补零，右对齐。\newline （SP根据请求和应答消息的Sequence\_Id一致性就可得到CMPP\_Submit消息的Msg\_Id）\\
+\hline
+Result&1&Unsigned Integer&结果\newline 
+0：正确\newline 
+1：消息结构错\newline 
+ 2：命令字错\newline 
+ 3：消息序号重复\newline 
+4：消息长度错\newline 
+5：资费代码错\newline 
+6：超过最大信息长\newline 
+7：业务代码错\newline 
+8：流量控制错\newline 
+9$\sim$：其他错误\\
+\hline
+\end{longtable}
+
+
+
+
 \subsection{SP向ISMG查询发送短信状态（CMPP\_QUERY）操作}
+
+CMPP\_QUERY操作的目的是SP向ISMG查询某时间的业务统计情况，可以按总数或按业务代码查询。
+
+ISMG以CMPP\_QUERY\_RESP应答。
+
+
 \subsubsection{CMPP\_QUERY消息的定义（SP\textrightarrow ISMG）}
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_QUERY消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Time&8&Octet String&时间YYYYMMDD(精确至日)\\
+\hline
+Query\_Type&1&Unsigned Integer&查询类别\newline 0：总数查询 \newline 1：按业务类型查询\\
+\hline
+Query\_Code&10&Octet String&查询码\newline 当Query\_Type为0时，此项无效；\newline 当Query\_Type为1时，此项填写业务类型Service\_Id\\
+\hline 
+Reserve&8&Octet String&保留\\
+\hline
+\end{longtable}
+
+
+
 \subsubsection{CMPP\_QUERY\_RESP消息的定义（ISMG\textrightarrow SP）}
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_QUERY\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Time&8&Octet String&时间(精确至日)\\
+\hline
+Query\_Type&1&Unsigned Integer&查询类别\newline 
+0：总数查询\newline 
+1：按业务类型查询\\
+\hline
+Query\_Code&10&Octet String&查询码\\
+\hline
+MT\_TLMsg&4&Unsigned Integer&从SP接收信息总数\\
+\hline
+MT\_Tlusr&4&Unsigned Integer&从SP接收用户总数\\
+\hline
+MT\_Scs&4&Unsigned Integer&成功转发数量\\
+\hline
+MT\_WT&4&Unsigned Integer&待转发数量\\
+\hline
+MT\_FL&4&Unsigned Integer&转发失败数量\\
+\hline
+MO\_Scs&4&Unsigned Integer&向SP成功送达数量\\
+\hline
+MO\_WT&4&Unsigned Integer&向SP待送达数量\\
+\hline
+MO\_FL&4&Unsigned Integer&向SP送达失败数量\\
+\hline
+\end{longtable}
+
+
 \subsection{ISMG向SP送交短信（CMPP\_DELIVER）操作}
+
+CMPP\_DELIVER操作的目的是ISMG把从短信中心或其它ISMG转发来的短信送交SP，SP以CMPP\_DELIVER\_RESP消息回应。
+
+
+
 \subsubsection{CMPP\_DELIVER消息定义（ISMG\textrightarrow SP）}
+
+
+\begin{longtable}{|m{85pt}|m{50pt}|m{80pt}|m{190pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_DELIVER消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Msg\_Id&8&Unsigned Integer&信息标识\newline 
+生成算法如下：\newline 
+采用64位（8字节）的整数：\newline 
+（1） 时间（格式为MMDDHHMMSS，即月日时分秒）：bit64$\sim$bit39，其中\newline 
+bit64$\sim$bit61：月份的二进制表示；\newline 
+bit60$\sim$bit56：日的二进制表示；\newline 
+bit55$\sim$bit51：小时的二进制表示；\newline 
+bit50$\sim$bit45：分的二进制表示；\newline 
+bit44$\sim$bit39：秒的二进制表示；\newline 
+（2） 短信网关代码：bit38$\sim$bit17，把短信网关的代码转换为整数填写到该字段中。\newline
+（3） 序列号：bit16$\sim$bit1，顺序增加，步长为1，循环使用。\newline
+各部分如不能填满，左补零，右对齐。\\
+\hline
+Dest\_Id&21&Octet String&目的号码 \newline SP的服务代码，一般4--6位，或者是前缀为服务代码的长号码；该号码是手机用户短消息的被叫号码。\\
+\hline
+Service\_Id&10&Octet String&业务类型，是数字、字母和符号的组合。\\
+\hline
+TP\_pid&1&Unsigned Integer&GSM协议类型。详细解释请参考GSM03.40中的9.2.3.9\\
+\hline
+TP\_udhi&1&Unsigned Integer&GSM协议类型。详细解释请参考GSM03.40中的9.2.3.23，仅使用1位，右对齐\\
+\hline
+Msg\_Fmt&1&Unsigned Integer&信息格式\newline 
+  0：ASCII串 \newline
+  3：短信写卡操作 \newline
+  4：二进制信息 \newline 
+  8：UCS2编码\newline 
+15：含GB汉字\\
+\hline
+Src\_terminal\_Id&21&Octet String&源终端MSISDN号码（状态报告时填为CMPP\_SUBMIT消息的目的终端号码）\\
+\hline
+Registered\_Delivery&1&Unsigned Integer&是否为状态报告\newline 
+0：非状态报告\newline 
+1：状态报告\\
+\hline
+Msg\_Length&1&Unsigned Integer&消息长度\\
+\hline
+Msg\_Content&Msg\_length&Octet String&消息内容\\
+\hline
+Reserved&8&Octet String&保留项\\
+\hline
+\end{longtable}
+
+
+当ISMG向SP送交状态报告时，信息内容字段（Msg\_Content）格式定义如下：
+
+
+\begin{longtable}{|m{75pt}|m{35pt}|m{75pt}|m{235pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{信息内容字段（Msg\_Content）格式定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Msg\_Id&8&Unsigned Integer&信息标识\newline SP提交短信（CMPP\_SUBMIT）操作时，与SP相连的ISMG产生的Msg\_Id。\\
+\hline
+Stat&7&Octet String&发送短信的应答结果，含义与SMPP协议要求中stat字段定义相同，详见“Stat字段定义”。SP根据该字段确定CMPP\_SUBMIT消息的处理状态。\\
+\hline
+Submit\_time&10&Octet String&YYMMDDHHMM（YY为年的后两位00$\sim$99，MM：01$\sim$12，DD：01$\sim$31，HH：00$\sim$23，MM：00$\sim$59）\\
+\hline
+Done\_time&10&Octet String&YYMMDDHHMM\\
+\hline
+Dest\_terminal\_Id&21&Octet String&目的终端MSISDN号码(SP发送CMPP\_SUBMIT消息的目标终端)\\
+\hline
+SMSC\_sequence&4&Unsigned Integer&取自SMSC发送状态报告的消息体中的消息标识。\\
+\hline
+\end{longtable}
+
+
+\begin{longtable}{|m{90pt}|m{100pt}|m{180pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+Message State&Final Message States&Description
+\endhead
+%endhead
+
+%firsthead
+\caption{Stat字段定义}\\
+\hline
+Message State&Final Message States&Description
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+DELIVERED&DELIVRD&Message is delivered to destination\\
+\hline
+EXPIRED&EXPIRED&Message validity period has expired\\
+\hline
+DELETED&DELETED&Message has been deleted.\\
+\hline
+UNDELIVERABLE&UNDELIV&Message is undeliverable\\
+\hline
+ACCEPTED&ACCEPTD&Message is in accepted state(i.e. has been manually read on behalf of the subscriber by customer service)\\
+\hline
+UNKNOWN&UNKNOWN&Message is in invalid state\\
+\hline
+REJECTED&REJECTD&Message is in a rejected state\\
+\hline
+\end{longtable}
+
+注意：
+
+\begin{compactenum}
+\item 其中ACCEPTED为中间状态，网关若从短信中心收到后应丢弃，不做任何操作。
+\item Stat字段长度为7个字节，填写时应填表一中Final Message States中的缩写形式，如状态为DELIVERED时填写DELIVRD，依此类推。
+\item SP等待状态报告缺省时间为48小时。
+\end{compactenum}
+
+
+
 \subsubsection{CMPP\_DELIVER\_RESP消息定义（SP\textrightarrow ISMG）}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_DELIVER\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Msg\_Id&8&Unsigned Integer&信息标识\newline （CMPP\_DELIVER中的Msg\_Id字段）\\
+\hline
+Result&1&Unsigned Integer&结果\newline 
+0：正确\newline 
+1：消息结构错\newline 
+ 2：命令字错\newline 
+ 3：消息序号重复\newline 
+4：消息长度错\newline 
+5：资费代码错\newline 
+6：超过最大信息长\newline 
+7：业务代码错\newline 
+8: 流量控制错\newline 
+9$\sim$ ：其他错误\\
+\hline
+\end{longtable}
+
+
+
 \subsection{SP向ISMG发起删除短信（CMPP\_CANCEL）操作}
+
+CMPP\_CANCEL操作的目的是SP通过此操作可以将已经提交给ISMG的短信删除，ISMG将以CMPP\_CANCEL\_RESP回应删除操作的结果。
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
+
 \subsubsection{CMPP\_CANCEL消息定义（SP\textrightarrow ISMG）}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_CANCEL消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Msg\_Id&8&Unsigned Integer&信息标识（SP想要删除的信息标识）\\
+\hline
+\end{longtable}
+
+
+
 \subsubsection{CMPP\_CANCEL\_RESP消息定义（ISMG\textrightarrow SP）}
-\subsection{链路检测（CMPP\_ACTIVE\_TEST）操作}
-\subsubsection{CMPP\_ACTIVE\_TEST定义（SP\textrightarrow ISMG或ISMG\textrightarrow SP）}
-\subsubsection{CMPP\_ACTIVE\_TEST\_RESP定义（SP\textrightarrow ISMG或ISMG\textrightarrow SP）}
-\section{互联网短信网关(ISMG)之间的消息定义}
-\subsection{源ISMG请求连接到目的ISMG（CMPP\_CONNECT）操作}
-\subsection{源ISMG请求拆除到目的ISMG的连接（CMPP\_TERMINATE）操作}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_CANCEL\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Success\_Id&1&Unsigned Integer&成功标识\newline 0：成功\newline 1：失败\\
+\hline
+\end{longtable}
+
+
 
 \subsection{链路检测（CMPP\_ACTIVE\_TEST）操作}
+
+本操作仅适用于通信双方采用长连接通信方式时用于保持连接。
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
+
+\subsubsection{CMPP\_ACTIVE\_TEST定义（SP\textrightarrow ISMG或ISMG\textrightarrow SP）}
+
+无消息体。
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
+\subsubsection{CMPP\_ACTIVE\_TEST\_RESP定义（SP\textrightarrow ISMG或ISMG\textrightarrow SP）}
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_ACTIVE\_TEST\_RESP定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Reserved& 1& & \\
+\hline
+\end{longtable}
+
+
+
+\section{互联网短信网关(ISMG)之间的消息定义}
+
+网关之间互为客户/服务器，任一方都可在需要时建立连接进行数据传输。
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
+
+\subsection{源ISMG请求连接到目的ISMG（CMPP\_CONNECT）操作}
+
+消息定义同CMPP\_CONNECT消息定义和CMPP\_CONNECT\_RESP消息定义所述，其中Source\_Addr填源网关代码。
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
+\subsection{源ISMG请求拆除到目的ISMG的连接（CMPP\_TERMINATE）操作}
+
+
+消息定义同CMPP\_TERMINATE消息定义和CMPP­\_TERMINATE\_RESP消息定义所述。
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
+
+\subsection{链路检测（CMPP\_ACTIVE\_TEST）操作}
+
+本操作仅用于通信双方采用长连接通信方式时保持连接。消息定义同CMPP\_CANCEL消息定义和1.1.1.1  CMPP\_CANCEL\_RESP消息定义所述。
+
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{CMPP_FWD定义}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
 \subsection{源ISMG向目的ISMG转发短信（CMPP\_FWD）操作}
+
+
+
+CMPP\_FWD操作的目的是源ISMG可以根据一定的路由策略将SP提交的短信、MO状态报告、短信中心产生的状态报告、用户提交的短信转发到目的ISMG，目的ISMG以CMPP\_FWD\_RESP回应。
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
 \subsubsection{CMPP\_FWD定义（ISMG\textrightarrow ISMG）}
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_FWD定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Source\_ Id&6&Octet String&源网关的代码（右对齐，左补0）\\
+\hline
+Destination\_Id&6&Octet String&目的网关代码（右对齐，左补0）\\
+\hline
+NodesCount&1&Unsigned Integer&经过的网关数量\\
+\hline
+Msg\_Fwd\_Type&1&Unsigned Integer&前转的消息类型\newline 
+0：MT前转\newline 
+1：MO前转 \newline 
+2：MT时的状态报告\newline 
+3：MO时的状态报告\\
+\hline
+Msg\_Id&8&Unsigned Integer&信息标识\\
+\hline
+Pk\_total&1&Unsigned Integer&相同Msg\_Id的消息总条数，从1开始\\
+\hline
+Pk\_number&1&Unsigned Integer&相同Msg\_Id的消息序号，从1开始\\
+\hline
+Registered\_Delivery&1&Unsigned Integer&是否要求返回状态确认报告\newline 
+0：不需要\newline 
+1：需要\newline 
+2：产生SMC话单\\
+\hline
+Msg\_level&1&Unsigned Integer&信息级别\\
+\hline
+Service\_Id&10&Octet String&业务类型\\
+\hline
+Fee\_UserType&1&Unsigned Integer&计费用户类型字段\newline 
+0：对目的终端MSISDN计费；\newline 
+1：对源终端MSISDN计费；\newline 
+2：对SP计费;\newline 
+3： 表示本字段无效，对谁计费参见Fee\_terminal\_Id字段。\\
+\hline
+Fee\_terminal\_Id&21&Unsigned Integer&被计费用户的号码（如本字节填空，则表示本字段无效，对谁计费参见Fee\_UserType字段。本字段与Fee\_UserType字段互斥）\\
+\hline
+TP\_pid&1&Unsigned Integer&GSM协议类型。详细是解释请参考GSM03.40中的9.2.3.9\\
+\hline
+TP\_udhi&1&Unsigned Integer&GSM协议类型。详细是解释请参考GSM03.40中的9.2.3.23,仅使用1位，右对齐\\
+\hline
+Msg\_Fmt&1&Unsigned Integer&信息格式\newline 
+  0：ASCII串\newline 
+  3：短信写卡操作\newline 
+  4：二进制信息\newline 
+  8：UCS2编码\newline 
+15：含GB汉字  \\
+\hline
+Msg\_src&6&Octet String&信息内容来源（SP\_Id，SP的企业代码）\\
+\hline
+FeeType&2&Octet String&资费类别\newline 
+00：“短消息类型”为“发送”，对“计费用户号码”不计信息费，此类话单仅用于核减SP对称的信道费\newline 
+01：对“计费用户号码”免费\newline 
+02：对“计费用户号码”按条计信息费\newline 
+03：对“计费用户号码”按包月收取信息费\newline 
+04：对“计费用户号码”的信息费封顶\newline 
+05：对“计费用户号码”的收费是由SP实现\\
+\hline
+FeeCode&6&Octet String&资费代码（以分为单位）\\
+\hline
+Valid\_Time&17&Octet String&有效期 \\
+\hline
+At\_Time&17&Octet String&定时发送的时间 \\
+\hline
+Src\_Id&21&Octet String&源号码\newline 
+1． MT时为SP的服务代码，即CMPP\_SUBMIT消息中的Src\_Id。\newline 
+2． MO时为发送此消息的源终端MSISDN号码。\newline 
+3． MT状态报告时，可填空或填接收到短信的终端MSISDN号码，即对应CMPP\_SUBMIT消息中的Dest\_Terminal\_Id。\newline 
+4． MO状态报告时，可填空或填SP的服务代码，即CMPP\_DELIVER中的Dest\_Id。\\
+\hline
+DestUsr\_tl&1&Unsigned Integer&接收消息的用户数量 \\
+\hline
+Dest\_Id&21*DestUsr\_tl&Octet String&目的号码\newline 
+1． MT转发时为目的终端MSISDN号码，即对应CMPP\_SUBMIT消息中的Dest\_Terminal\_Id。\newline 
+2． MO转发时为SP的服务代码，一般4$\sim$6位，或者是前缀为服务代码的长号码，该号码是手机用户短消息的被叫号码。\newline 
+3． MT状态报告时，可填空或填目的SP的服务代码，即CMPP\_SUBMIT消息中的Src\_Id。\newline 
+4． MO状态报告时，可填空或填发送短信的移动用户MSISDN号码。\\
+\hline
+Msg\_Length&1&Unsigned Integer&消息长度\\
+\hline
+Msg\_Content&Msg\_length&Octet String&消息内容\\
+\hline
+Reserve&8& &保留\\
+\hline
+\end{longtable}
+
+注意：
+
+
+\begin{compactenum}
+\item 对于包月的SMC消息，应由ISMG向SP返回成功与否的状态报告，格式同CMPP\_DELIVER消息定义，若成功回送Stat值为“DELIVRD”，失败则回送Stat值“UNDELIV”。
+\item 当转发消息为MO状态报告（MO状态报告的产生见附录1）时，信息内容字段（Msg\_Content）格式定义如下：
+\end{compactenum}
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{信息内容字段（Msg\_Content）格式定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Msg\_Id&8&Unsigned Integer&信息标识（CMPP\_Deliver中的信息标识）\\
+\hline
+Stat&7&Octet String&SP的应答结果，CMPP\_DELIVER\_RESP中Result为0时，填字符DELIVRD,其余值填REJECTD。\\
+\hline
+CMPP\_DELIVER\_time&10&Octet String&YYMMDDHHMM（YY为年的后两位00$\sim$99，MM：01$\sim$12，DD：01$\sim$31，HH：00$\sim$23，MM：00$\sim$59）\newline 注：短信网关发出CMPP\_DELIVER的时间。\\
+\hline
+CMPP\_DELIVER\_RESP\_time&10&Octet String&YYMMDDHHMM\newline 注：短信网关收到CMPP\_DELIVER\_RESP的时间。\\
+\hline
+Dest\_Id&21&Reserved&目的SP的服务代码，左对齐。\\
+\hline
+Reserved&4& & \\
+\hline
+\end{longtable}
+
+
+注意：
+
+在MO流程中，若短信经ISMG2转发给与SP相连的ISMG1，ISMG1在给SP发送消息时可能存在四种情况：
+
+\begin{compactenum}
+\item 发送消息前连接断开；
+\item 多次发送消息后没有接收到响应消息；
+\item 发送消息后接收到错误的响应消息；
+\item 发送消息后接收到正确的应答消息。
+\end{compactenum}
+
+
+对上述这四种情况的处理描述如下：
+
+\begin{compactitem}
+\item 1/2/3：ISMG1在处理这三种情况的时候，向ISMG2发送MO状态报告，状态报告中的stat字段取值为“REJECTD”。
+\item 4：ISMG1在处理这种情况时，向ISMG2发送MO状态报告，其中stat字段取值“DELIVRD”。
+\end{compactitem}
+
+
+在MT流程中，MT状态报告格式同CMPP\_DELIVER消息定义，若SP发送的短信经由ISMG1转发给ISMG2，ISMG1给ISMG2发送消息时可能存在四种情况：
+
+\begin{compactenum}
+\item 发送消息前连接断开；
+\item 多次发送消息后没有接收到响应消息；
+\item 发送消息后接收到错误的响应消息；
+\item 发送消息后接收到正确的应答消息。
+\end{compactenum}
+
+
+对上述这四种情况的处理描述如下：
+
+\begin{compactitem}
+\item 1/2/3：ISMG1在处理这三种情况的时候，向SP发送MT状态报告（如果SP要求状态报告），状态报告中的stat字段取值为“REJECTD”。
+\item 4：ISMG1在处理这种情况时，继续等待ISMG2返回状态报告。
+\end{compactitem}
+
+
+随后，ISMG2给SMC发送消息时可能存在四种情况：
+
+\begin{compactenum}
+\item 发送消息前连接断开；
+\item 多次发送消息后没有接收到响应消息；
+\item 发送消息后接收到错误的响应消息；
+\item 发送消息后接收到正确的应答消息。
+\end{compactenum}
+
+
+对这四种情况的处理描述如下：
+
+\begin{compactitem}
+\item 1/2/3：ISMG2在处理这三种情况的时候，向SP发送MT状态报告（如果SP要求状态报告），状态报告中的stat字段取值为“REJECTD”。
+\item 4：ISMG2在处理这种情况时，继续等待SMC返回状态报告。
+\end{compactitem}
+
+
+
+
 \subsubsection{CMPP\_FWD\_RESP定义（ISMG\textrightarrow ISMG）}
+
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_FWD\_RESP定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Msg\_Id&8&Unsigned Integer&信息标识（CMPP\_FWD中字段值）\\
+\hline
+Pk\_total&1&Unsigned Integer&相同Msg\_Id的消息总条数\\
+\hline
+Pk\_number&1&Unsigned Integer&相同Msg\_Id的消息序号\\
+\hline
+Result&1&Unsigned Integer&结果\newline 
+0：正确\newline 
+1：消息结构错\newline 
+ 2：命令字错\newline 
+ 3：消息序号重复\newline 
+4：消息长度错\newline 
+5：资费代码错\newline 
+6：超过最大信息长\newline 
+7：业务代码错\newline 
+8: 流量控制错\newline 
+9: 前转判断错(此SP不应发往本ISMG)\newline 
+10$\sim$ ：其他错误\\
+\hline
+\end{longtable}
+
+
+
+
+
+
 \section{互联网短信网关(ISMG)与汇接网关(GNS)之间的消息定义}
+
+要求ISMG与GNS在信息交互时使用短连接的通信方式。ISMG与GNS可互为客户/服务器。
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
+
 \subsection{ISMG请求连接到GNS或GNS请求连接到ISMG（CMPP\_CONNECT）操作}
+
+
+消息定义同CMPP\_CONNECT消息定义和CMPP\_CONNECT\_RESP消息定义所述，其中Source\_Addr填源网关代码，可能是ISMG代码或GNS代码。
+
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
 \subsection{ISMG请求拆除到GNS的连接或GNS请求拆除到ISMG的连接（CMPP\_TERMINATE）操作}
+
+
+消息定义同CMPP­\_TERMINATE消息定义和CMPP­\_TERMINATE\_RESP消息定义所述。
+
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
 \subsection{ISMG向汇接网关查询MT路由（CMPP\_MT\_ROUTE）操作}
+
+CMPP\_MT\_ROUTE操作用于ISMG不知道需要转发MT消息的路由时查询GNS。GNS以CMPP\_MT\_ROUTE\_RESP应答。
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
 \subsubsection{CMPP\_MT\_ROUTE消息定义（ISMG\textrightarrow GNS）}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_MT\_ROUTE消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Source\_Id&6&Octet String&源网关代码\\
+\hline
+Terminal\_Id&21&Octet String&目的终端MSISDN号码\\
+\hline
+\end{longtable}
+
+
+
+
 \subsubsection{CMPP\_MT\_ROUTE\_RESP消息定义（GNS\textrightarrow ISMG）}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_MT\_ROUTE\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Route\_Id&4&Unsigned Integer&路由编号(从0开始,由GNS统一分配)\\
+\hline
+Destination\_Id&6&Octet String&目标网关代码\\
+\hline
+Gateway\_IP&15&Octet String&目标网关IP地址\\
+\hline
+Gateway\_port&2&Unsigned Integer&目标网关IP端口(7890或7900\\
+\hline)
+Start\_Id&6&Octet String&MT路由起始号码段\\
+\hline
+End\_Id&6&Octet String&MT路由截止号码段\\
+\hline
+Area\_code&4&Octet String&手机所属省代号\\
+\hline
+Result&1&Unsigned Integer&结果\newline 
+0：正常\newline 1：没有匹配路由\newline 
+2：这是最后1条路由\\
+\hline
+\end{longtable}
+
+
+
 \subsection{ISMG向汇接网关查询MO路由（CMPP\_MO\_ROUTE）操作}
+
+CMPP\_MO\_ROUTE操作的目的是使ISMG当不知道需要转发MO消息的路由时可向GNS查询得到。GNS以CMPP\_MO\_ROUTE\_RESP应答。
+
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
 \subsubsection{CMPP\_MO\_ROUTE消息定义（ISMG\textrightarrow GNS）}
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_MO\_ROUTE消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Source\_Id&6&Octet String&源网关代码\\
+\hline
+SP\_Code&21&Octet String&SP的服务代码\\
+\hline
+Service\_Id&10&Octet String&请求的业务类型（此项适合全网服务内容，如爱心卡图片传情）\\
+\hline
+Service\_Code&4&Unsigned Integer&请求的业务代码\newline （如果未置Service\_Id字段，此字段为空，如爱心卡图片传情TPCQ1000—2000对应某个网站的某些相应图片）\\
+\hline
+\end{longtable}
+
+
+
 \subsubsection{CMPP\_MO\_ROUTE\_RESP消息定义（GNS\textrightarrow ISMG）}
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_MO\_ROUTE\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Route\_Id&4&Unsigned Integer&路由编号\\
+\hline
+Destination\_Id&6&Octet String&目标网关代码\\
+\hline
+Gateway\_IP&15&Octet String&目标网关IP地址\\
+\hline
+Gateway\_port&2&Unsigned Integer&目标网关IP端口\\
+\hline
+SP\_Id&21&Octet String&SP的企业代码\\
+\hline
+Start\_code&4&Unsigned Integer&MO路由起始业务代码\newline （如果未置请求的Service\_Id字段，此字段为空）\\
+\hline
+End\_code&4&Unsigned Integer&MO路由截止业务代码\newline （如果未置请求的Service\_Id字段，此字段为空）\\
+\hline
+Result&1&Unsigned Integer&结果\newline 0：正常\newline 1：没有匹配路由\newline 2：这是最后1条路由\\
+\hline
+\end{longtable}
+
+
+
 \subsection{ISMG向汇接网关获取路由（CMPP\_GET\_ROUTE）操作}
+
+CMPP\_GET\_ROUTE操作的目的是使ISMG可向GNS查询MO或MT时的路由信息。GNS以CMPP\_GET\_ROUTE\_RESP消息回应。
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
 \subsubsection{CMPP\_GET\_ ROUTE消息定义（ISMG\textrightarrow GNS）}
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_GET\_ ROUTE消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Source\_Id&6&Octet String&源网关代码\\
+\hline
+Route\_type&2&Octet String&路由类型\newline MO：MO路由\newline MT：MT路由\\
+\hline
+Last\_route\_Id&4&Integer&已经接收的上一条路由编号（第1次发送此请求时Last\_route\_Id=
+-1）\\
+\hline
+\end{longtable}
+
+
+
 \subsubsection{CMPP\_GET\_ ROUTE\_RESP消息定义（GNS\textrightarrow ISMG）}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_GET\_ ROUTE\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Route\_Id&4&Unsigned Integer&路由编号\\
+\hline
+Destination\_Id&6&Octet String&目标网关代码\\
+\hline
+Gateway\_IP&15&Octet String&目标网关IP地址\\
+\hline
+Gateway\_port&2&Unsigned Integer&目标网关IP端口\\
+\hline
+SP\_Code&21&Octet String&SP的服务代码（请求的路由类型=MT时，此字段为空）\\
+\hline
+Service\_Id&10&Octet String&请求的业务类型（此项适合全网服务内容，如爱心卡图片传情）\\
+\hline
+Start\_code&4&Unsigned Integer&请求的路由类型=MO时：起始业务代码（如果未置Service\_Id字段，此字段为空）\newline 请求的路由类型=MT时：手机号码段的起始号码\\
+\hline
+End\_code&4&Unsigned Integer&请求的路由类型=MO时：截止业务代码（如果未置Service\_Id字段，此字段为空）\newline 请求的路由类型=MT时：手机号码段的截止号码\\
+\hline
+Area\_code&4&Octet String&手机所属省代码（请求的路由类型=MO时，此字段为空）\\
+\hline
+Result&1&Unsigned Integer&结果\newline 0：正常\newline 1：没有匹配路由\newline 2：这是最后1条路由\\
+\hline
+\end{longtable}
+
+
+
 \subsection{ISMG向汇接网关更新MT路由（CMPP\_MT\_ROUTE\_UPDATE）操作}
+
+
+
+CMPP\_MT\_ROUTE\_UPDATE操作的目的是使ISMG可向GNS更新MT路由信息。GNS以CMPP\_MT\_ROUTE\_UPDATE\_RESP消息回应。
+
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
 \subsubsection{CMPP\_MT\_ROUTE\_UPDATE消息定义（ISMG\textrightarrow GNS）}
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_MT\_ROUTE\_UPDATE消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Update\_type&1&Unsigned Integer&0：添加\newline 1：删除\newline 2：更新\\
+\hline
+Route\_Id&4&Unsigned Integer&路由编号（若update\_type 为0，即添加时，此字段为零）\\
+\hline
+Destination\_Id&6&Octet String&目标网关代码\\
+\hline
+Gateway\_IP&15&Octet String&目标网关IP地址\\
+\hline
+Gateway\_port&2&Unsigned Integer&目标网关IP端口\\
+\hline
+Start\_Id&6&Octet String&MT路由起始号码段\\
+\hline
+End\_Id&6&Octet String&MT路由截止号码段\\
+\hline
+Area\_code&4&Octet String&手机所属省代码\\
+\hline
+\end{longtable}
+
+
 \subsubsection{CMPP\_MT\_ROUTE\_UPDATE\_RESP消息定义（GNS\textrightarrow ISMG）}
+
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_MT\_ROUTE\_UPDATE\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Result&1&Unsigned Integer&0：数据合法，等待核实\newline 1：数据不合法\\
+\hline
+\end{longtable}
+
+
+
 \subsection{ISMG向汇接网关更新MO路由（CMPP\_MO\_ROUTE\_UPDATE）操作}
+
+CMPP\_MO\_ROUTE\_UPDATE操作的目的是使ISMG可向GNS更新MO路由信息。GNS以CMPP\_MO\_ROUTE\_UPDATE\_RESP消息回应。
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
 \subsubsection{CMPP\_MO\_ROUTE\_UPDATE消息定义（ISMG\textrightarrow GNS）}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_MO\_ROUTE\_UPDATE消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Update\_type&1&Unsigned Integer&0：添加\newline 1：删除\newline 2：更新\\
+\hline
+Route\_Id&4&Unsigned Integer&路由编号（若update\_type 为0，即添加时，此字段为零）\\
+\hline
+Destination\_Id&6&Octet String&目标网关代码\\
+\hline
+Gateway\_IP&15&Octet String&目标网关IP地址\\
+\hline
+Gateway\_port&2&Unsigned Integer&目标网关IP端口\\
+\hline
+SP\_Code&21&Octet String&SP的服务号码\\
+\hline
+Service\_Id&10&Octet String&请求的业务类型（此项适合全网服务内容，如爱心卡图片传情,如该路由不包含此业务，此字段为空）\\
+\hline
+Start\_code&4&Unsigned Integer&MO路由起始业务代码（如果未置请求的Service\_Id字段，此字段为空）\\
+\hline
+End\_code&4&Unsigned Integer&MO路由截止业务代码（如果未置请求的Service\_Id字段，此字段为空）\\
+\hline
+\end{longtable}
+
+
+
 \subsubsection{CMPP\_MO\_ROUTE\_UPDATE\_RESP消息定义（GNS\textrightarrow ISMG）}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_MO\_ROUTE\_UPDATE\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Result&1&Unsigned Integer&0：数据合法，等待核实\newline 1：数据不合法\\
+\hline
+\end{longtable}
+
+
+
 \subsection{汇接网关向ISMG更新MT路由（CMPP\_PUSH\_MT\_ROUTE\_UPDATE）操作}
+
+
+CMPP\_PUSH\_MT\_ROUTE\_UPDATE操作的目的是使GNS可向ISMG更新MT路由信息。ISMG以CMPP\_PUSH\_MT\_ROUTE\_UPDATE\_RESP 消息回应。
+
+
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
 \subsubsection{CMPP\_PUSH\_MT\_ROUTE\_UPDATE消息定义（GNS\textrightarrow ISMG）}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_PUSH\_MT\_ROUTE\_UPDATE消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Update\_type&1&Unsigned Integer&0：添加；\newline 1：删除；\newline 2：更新\\
+\hline
+Route\_Id&4&Unsigned Integer&路由编号\\
+\hline
+Destination\_Id&6&Octet String&目标网关代码\\
+\hline
+Gateway\_IP&15&Octet String&目标网关IP地址\\
+\hline
+Gateway\_port&2&Unsigned Integer&目标网关IP端口\\
+\hline
+Start\_Id&6&Octet String&MT路由起始号码段\\
+\hline
+End\_Id&6&Octet String&MT路由截止号码段\\
+\hline
+Area\_code&4&Octet String&手机所属省代码\\
+\hline
+\end{longtable}
+
+
+
 \subsubsection{CMPP\_PUSH\_MT\_ROUTE\_UPDATE\_RESP消息定义（ISMG\textrightarrow GNS）}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_PUSH\_MT\_ROUTE\_UPDATE\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Result&1&Unsigned Integer&0：成功更改\newline 1：更改失败\\
+\hline
+\end{longtable}
+
+
+
 \subsection{汇接网关向ISMG更新MO路由（CMPP\_PUSH\_MO\_ROUTE\_UPDATE）操作}
+
+
+CMPP\_PUSH\_MO\_ROUTE\_UPDATE操作的目的是使GNS可向ISMG更新MO路由信息。ISMG以CMPP\_PUSH\_MO\_ROUTE\_UPDATE\_RESP 消息回应。
+
+
+
+%\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%%head
+%\multicolumn{4}{r}{}
+%\tabularnewline\hline
+%字段名&字节数&属性&描述
+%\endhead
+%%endhead
+%
+%%firsthead
+%\caption{}\\
+%\hline
+%字段名&字节数&属性&描述
+%\endfirsthead
+%%endfirsthead
+%
+%%foot
+%\multicolumn{4}{r}{}
+%\endfoot
+%%endfoot
+%
+%%lastfoot
+%\endlastfoot
+%%endlastfoot
+%
+%\hline
+%
+%\hline
+%\end{longtable}
+
+
+
 \subsubsection{CMPP\_PUSH\_MO\_ROUTE\_UPDATE消息定义（GNS\textrightarrow ISMG）}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_PUSH\_MO\_ROUTE\_UPDATE消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Update\_type&1&Unsigned Integer&0：添加；\newline 1：删除；\newline 2：更新\\
+\hline
+Route\_Id&4&Unsigned Integer&路由编号\\
+\hline
+Destination\_Id&6&Octet String&目标网关代码\\
+\hline
+Gateway\_IP&15&Octet String&目标网关IP地址\\
+\hline
+Gateway\_port&2&Unsigned Integer&目标网关IP端口\\
+\hline
+SP\_Code&21&Octet String&SP的服务号码\\
+\hline
+Service\_Id&10&Octet String&请求的业务类型（此项适合全网服务内容，如爱心卡图片传情,如该路由不包含此业务，此字段为空）\\
+\hline
+Start\_code&4&Unsigned Integer&MO路由起始业务代码（如果未置请求的Service\_Id字段，此字段为空）\\
+\hline
+End\_code&4&Unsigned Integer&MO路由截止业务代码（如果未置请求的Service\_Id字段，此字段为空）\\
+\hline
+\end{longtable}
+
+
+
 \subsubsection{CMPP\_PUSH\_MO\_ROUTE\_UPDATE\_RESP消息定义（ISMG\textrightarrow GNS）}
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{CMPP\_PUSH\_MO\_ROUTE\_UPDATE\_RESP消息定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Result&1&Unsigned Integer&0：成功更改\newline 1：更改失败\\
+\hline
+\end{longtable}
+
+
+
 \section{系统定义}
+
+
+
+
 \subsection{Command\_Id定义}
+
+
+\begin{longtable}{|m{200pt}|m{80pt}|m{120pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+消息&Command\_Id值&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{Command\_Id定义}\\
+\hline
+消息&Command\_Id值&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+CMPP\_CONNECT&0x00000001&请求连接\\
+\hline
+CMPP\_CONNECT\_RESP&0x80000001&请求连接应答\\
+\hline
+CMPP\_TERMINATE&0x00000002&终止连接\\
+\hline
+CMPP\_TERMINATE\_RESP&0x80000002&终止连接应答\\
+\hline
+CMPP\_SUBMIT&0x00000004&提交短信\\
+\hline
+CMPP\_SUBMIT\_RESP&0x80000004&提交短信应答\\
+\hline
+CMPP\_DELIVER&0x00000005&短信下发\\
+\hline
+CMPP\_DELIVER\_RESP&0x80000005&下发短信应答\\
+\hline
+CMPP\_QUERY&0x00000006&发送短信状态查询\\
+\hline
+CMPP\_QUERY\_RESP&0x80000006&发送短信状态查询应答\\
+\hline
+CMPP\_CANCEL&0x00000007&删除短信\\
+\hline
+CMPP\_CANCEL\_RESP&0x80000007&删除短信应答\\
+\hline
+CMPP\_ACTIVE\_TEST&0x00000008&激活测试\\
+\hline
+CMPP\_ACTIVE\_TEST\_RESP&0x80000008&激活测试应答\\
+\hline
+CMPP\_FWD&0x00000009&消息前转\\
+\hline
+CMPP\_FWD\_RESP&0x80000009&消息前转应答\\
+\hline
+CMPP\_MT\_ROUTE&0x00000010&MT路由请求\\
+\hline
+CMPP\_MT\_ROUTE\_RESP&0x80000010&MT路由请求应答\\
+\hline
+CMPP\_MO\_ROUTE&0x00000011&MO路由请求\\
+\hline
+CMPP\_MO\_ROUTE\_RESP&0x80000011&MO路由请求应答\\
+\hline
+CMPP\_GET\_ROUTE&0x00000012&获取路由请求\\
+\hline
+CMPP\_GET\_ROUTE\_RESP&0x80000012&获取路由请求应答\\
+\hline
+CMPP\_MT\_ROUTE\_UPDATE&0x00000013&MT路由更新\\
+\hline
+CMPP\_MT\_ROUTE\_UPDATE\_RESP&0x80000013&MT路由更新应答\\
+\hline
+CMPP\_MO\_ROUTE\_UPDATE&0x00000014&MO路由更新\\
+\hline
+CMPP\_MO\_ROUTE\_UPDATE\_RESP&0x80000014&MO路由更新应答\\
+\hline
+CMPP\_PUSH\_MT\_ROUTE\_UPDATE&0x00000015&MT路由更新\\
+\hline
+CMPP\_PUSH\_MT\_ROUTE\_UPDATE\_RESP&0x80000015&MT路由更新应答\\
+\hline
+CMPP\_PUSH\_MO\_ROUTE\_UPDATE&0x00000016&MO路由更新\\
+\hline
+CMPP\_PUSH\_MO\_ROUTE\_UPDATE\_RESP&0x80000016&MO路由更新应答\\
+\hline
+\end{longtable}
+
+
 \section{MO状态报告的产生}
+
+为解决MO业务计费及使源网关获知SP对转发的MO消息的接收状态，现要求网关处理流程如下图所示：
+
+
+
+
+
+\begin{compactenum}
+\item 用户提交短信到SMSC；
+\item SMSC给用户返回提交短信的应答，让用户知道短信发送成功与否，如果该处失败，则SMSC不再进行下述的流程；
+\item SMSC通过SMPP消息DELIVER\_SM把短信发送给ISMG1；
+\item ISMG1以DELIVER\_SM\_RESP消息应答给SMSC；
+\item ISMG1根据用户发送的短消息中目的SP服务代码查询路由后转发给ISMG2；
+\item ISMG2发送CMPP\_FWD\_RESP消息应答；
+\item SP对 ISMG2将用户的短信提交给SP；
+\item ISMG2发送提交应答；
+\item 为保证ISMG1获知SP的接收情况，此时ISMG2应产生一个状态报告转发给ISMG1；
+\item ISMG1收到此状态报告后发送转发应答响应；
+\end{compactenum}
+
+目的网关用于向源网关通知SP接收情况的状态报告时，CMPP\_FWD消息中Msg\_Fwd\_Type值为3，表示MO的状态报告，信息内容字段（Msg\_Content）格式定义如下：
+
+
+
+\begin{longtable}{|m{90pt}|m{35pt}|m{80pt}|m{200pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+字段名&字节数&属性&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{信息内容字段（Msg\_Content）格式定义}\\
+\hline
+字段名&字节数&属性&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Msg\_Id&8&Unsigned Integer&信息标识（CMPP\_DELIVER中的信息标识）\\
+\hline
+Stat&7&Octet String&SP的应答结果，CMPP\_DELIVER\_RESP中Result值的字符表示，左对齐。Result为0时，填字符DELIVRD，其余值填REJECTD\\
+\hline
+CMPP\_Deliver\_time&10&Octet String&YYMMDDHHMM（YY为年的后两位00-99，MM：01-12，DD：01-31，HH：00-23，MM：00-59）\newline 注：短信网关发出CMPP\_DELIVER的时间。\\
+\hline
+CMPP\_Deliver\_RESP\_time&10&Octet String&YYMMDDHHMM\newline 注：短信网关收到CMPP\_DELIVER\_RESP的时间。\\
+\hline
+Dest\_Id&21&Octet String&目的SP的服务代码，左对齐。\\
+\hline
+Reserved&4&Reserved& \\
+\hline
+\end{longtable}
+
+
 \section{修订历史}
+
+\begin{longtable}{|m{90pt}|m{40pt}|m{250pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+版本号&时间&主要内容或重大修改
+\endhead
+%endhead
+
+%firsthead
+\hline
+版本号&时间&主要内容或重大修改
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+CMPP V1.2.1&2001.6& \\
+\hline
+CMPP V2.0&2002.4&1. 修改了Msg\_Id的生成算法；\newline 
+2. 明确了有关短信群发的问题；\newline 
+3. CMPP\_MO\_ROUTE\_RESP中的SP\_CODE改为SP\_Id（SP企业代码）；\newline 
+4. ISMG与GNS交互的消息中Area\_Code含义定义为省代码，用省会城市区号表示；\newline 
+5. 对Service\_Id字段的要求放宽，可以是数字、字母和符号的组合；\newline 
+6. 明确Dest\_terminal\_Id字段允许在用户终端号码前加“86”或“+86”；\newline 
+7. 规定网关SP之间、网关之间消息发送等待确认时间暂定为60秒，超过则认为超时需要重发两次；\newline 
+8. 规定了对于包月的SMC消息，应向SP返回成功与否的状态报告，若成功Stat值为DELIVRD，失败Stat值为UNDELIV；\newline 
+9. 明确状态报告中ACCEPTED为中间状态，网关收到后应丢弃不做任何操作；\newline 
+10. 修改了CMPP\_ACTIVE\_TEST\_RESP的消息格式；\newline 
+11. 增加了MO状态报告的格式、流程；\newline 
+12. 在缩略语中增加了一些定义，改正了一些文字上前后不一致的地方，进行了版面调整；\newline 
+13. 增加了网关在异常情形下的MO/MT状态报告的产生机制；\newline 
+14. 对原协议中的端口号作了重新规定。\\
+\hline
+\end{longtable}
+
+\part{短信平台接口说明}
+
+
+
+
+
+\chapter{普通短信发送}
+
+
+本文档主要定了短信平台对用户开放的主要接口和定义。
+
+用户可通过HTTP的GET和POST方式提交短信发送请求。
+
+
+
+\section{短信提交地址}
+
+短信可以提交不超过50000个手机号码，每个号码用英文逗号间隔。
+
+URL地址为：http://IP:PORT/msg/HttpBatchSendSM。
+
+注：其中IP:PORT为服务部署的地址和端口。
+
+IP为222.73.117.158，PORT默认为80.
+
+\section{参数定义}
+\section{短信提交响应}
+\subsection{格式说明}
+\subsection{示例}
+\subsection{响应状态值说明}
+\section{注意事项}
+\section{短信发送例子}
+\chapter{状态报告推送}
+\section{参数定义}
+\section{状态报告值}
+\section{示例}
+\chapter{短信接收}
+\section{参数定义}
+\section{示例}
+\chapter{额度查询接口}
+\section{接口地址}
+\section{参数定义}
+\section{提交响应}
+\section{提交响应值}
+\section{示例}
+\chapter{充值接口}
+\section{接口地址}
+\section{参数定义}
+\section{提交响应}
+\section{提交响应值}
+\section{示例}
+\chapter{开户接口}
+\section{接口地址}
+\section{参数定义}
+\section{提交响应}
+\section{提交响应值}
+\chapter{附录}
+
+
+\part{SMS}
+
 
 
 
