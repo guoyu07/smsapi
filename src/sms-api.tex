@@ -107,7 +107,7 @@
 %%% The "real" document content comes below...
 \makeindex
 
-\title{短信管理系统}
+\title{短信验证码管理系统}
 \author{张国玉~~zgy@bz-inc.com}
 %\date{} % Activate to display a given date or no date (if empty),
          % otherwise the current date is printed 
@@ -2828,9 +2828,77 @@ CMPP V2.0&2002.4&1. 修改了Msg\_Id的生成算法；\newline
 \chapter{普通短信发送}
 
 
-本文档主要定了短信平台对用户开放的主要接口和定义。
+本文档主要定了短信平台对用户开放的主要接口和定义，可以用来在短信验证码通道的基础上开发短信验证码管理系统。
 
-用户可通过HTTP的GET和POST方式提交短信发送请求。
+\begin{compactitem}
+\item 验证码收取时间
+
+如果验证码收取时间过长，用户可能放弃注册并造成流失。
+
+\item 短信通道质量
+
+如果短信通道质量不稳定，可能会导致短信无法正常发送。
+
+\item 短信拦截
+
+如果短信通道发送大量垃圾短信，那么正常短信也可能被安全软件和防火墙标记为垃圾短信。
+
+\end{compactitem}
+
+用户可通过HTTP的GET和POST方式提交短信发送请求，并实现节日祝福、订票管理、物流管理、订房管理、缴费通知、注册验证码和账户额度变更通知等。
+
+\begin{compactitem}
+\item 端口号:10690092+/10690529+((1-2位)或(3-4位)或(5-6位))
+\item 提交速度500条/秒
+\item 用户可以自主签名
+\item 支持长短信(500字以内)
+\item 支持黑名单管理
+\item 用户可以自己选择发送时间，(24小时全天候发送)
+\end{compactitem}
+
+用户基于提供CMPP、HTTP、API等接口进行二次开发，可以用于APP注册、用户提醒、票务物流等应用。
+
+
+\begin{longtable}{|m{70pt}|m{150pt}|m{200pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+特性&说明&备注
+\endhead
+%endhead
+
+%firsthead
+\caption{短信通道}\\
+\hline
+特性&说明&备注
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+送达率& & 正常的号码都可以收到。非正常号码（例如空号、停机号和移动黑名单）无法接通。\\
+\hline
+短信记录查询& 是否可查询已发送的短信号码及内容；\newline 是否可显示送达情况（成功或失败）；& 可查询短信发送号码及内容；\newline 可查询发送每个号码的状态（成功，失败的可详细查询到是否是空号，停机号，黑名单，还是无法接通的号码） \\
+\hline
+短信回复& 是否支持回复，是否支持回复内容查询；& 支持回复并可查询\\
+\hline
+输出号码端口& 移动：\newline 联通：\newline 电信：& 客户独享通道三网合一：10690092xxx（后三位用户方使用）\\
+\hline
+短信发送失败& 发送不成功的号码是否可导出；能否再次发送短信，是否需要其他渠道再次发送；& 如果因平台系统技术原因导致发送到达率低至95\%，由短信通道免费导出失败号码并免费二次发送\\
+\hline
+付款要求& 先付费充值还是先充值后付款& 提前付费充值 \\
+\hline
+号码信息保密& &短信通道提供移动直连原始账户密码，用户方进行密码修改 \\
+\hline
+\end{longtable}
 
 
 
@@ -2838,49 +2906,855 @@ CMPP V2.0&2002.4&1. 修改了Msg\_Id的生成算法；\newline
 
 短信可以提交不超过50000个手机号码，每个号码用英文逗号间隔。
 
-URL地址为：http://IP:PORT/msg/HttpBatchSendSM。
+URL地址为：\url{http://IP:PORT/msg/HttpBatchSendSM}\footnote{其中\texttt{IP:PORT}为服务部署的地址和端口。}。
 
-注：其中IP:PORT为服务部署的地址和端口。
+
+例如，如果IP为222.73.117.158，PORT默认为80，因此处理用户发送的短信发送请求的URL地址就是：\url{http://222.73.117.158:80/msg/HttpBatchSendSM}
+
+\section{短信提交参数定义}
+
+
+\begin{longtable}{|m{25pt}|m{50pt}|m{300pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+序号&参数&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{参数定义}\\
+\hline
+序号&参数&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+1& account& 必填参数。用户账号\\
+\hline
+2& pswd & 必填参数。用户密码\\
+\hline
+3& mobile & 必填参数。合法的手机号码，号码间用英文逗号分隔\\
+\hline
+4& msg & 必填参数。短信内容，短信内容长度不能超过585个字符。使用URL方式编码为UTF-8格式。\newline 短信内容超过70个字符（企信通是60个字符）时，会被拆分成多条，然后以长短信的格式发送。\\
+\hline
+5& needstatus & 必填参数。是否需要状态报告，取值true或false。\newline true，表明需要状态报告；false不需要状态报告\\
+\hline
+6& product & 可选参数。用户订购的产品id，不填写（针对老用户）系统采用用户的默认产品，用户订购多个产品时必填，否则会发生计费错误。\\
+\hline
+7& extno & 可选参数，扩展码，用户定义扩展码，3位\\
+\hline
+\end{longtable}
+
+
+
+
+
+\section{短信提交响应}
+
+用户短信通过http请求提交到服务器后，服务器返回响应码，响应码的格式如下：
+
+\begin{lstlisting}[xleftmargin=.5in]
+resptime,respstatus
+msgid
+\end{lstlisting}
+
+
+\begin{lstlisting}
+
+\end{lstlisting}
+
+
+
+
+\subsection{格式说明}
+
+短信提交响应分为两行，第一行为响应时间和状态，第二行为服务器给出提交msgid。
+
+无论发送的号码是多少，一个发送请求只返回一个msgid，如果响应的状态不是“0”，则没有msgid即第二行数据。（每行以换行符(0x0a,即\textbackslash n)分割）。
+
+
+\subsection{示例}
+
+\begin{compactitem}
+\item 提交成功
+
+\begin{lstlisting}
+20110725160412,0
+1234567890100
+\end{lstlisting}
+
+响应时间为20110725160412，响应状态为0 表明那个成功提交到服务器；1234567890100为返回的msgid，这个工状态报告匹配时使用。
+
+\item 提交失败
+
+\begin{lstlisting}
+20110725160412,101
+\end{lstlisting}
+
+\end{compactitem}
+
+\subsection{响应状态值说明}
+
+
+\begin{longtable}{|m{25pt}|m{310pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+代码& 说明
+\endhead
+%endhead
+
+%firsthead
+\caption{响应状态值说明}\\
+\hline
+代码& 说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+0& 提交成功\\
+\hline
+101& 无此用户\\
+\hline
+102& 密码错\\
+\hline
+103& 提交过快（提交速度超过流速限制）\\
+\hline
+104& 系统忙（因平台侧原因，暂时无法处理提交的短信）\\
+\hline
+105& 敏感短信（短信内容包含敏感词）\\
+\hline
+106& 消息长度错（>536或<=0）\\
+\hline
+107& 包含错误的手机号码\\
+\hline
+108& 手机号码个数错（群发>50000或<=0;单发>200或<=0）\\
+\hline
+109& 无发送额度（该用户可用短信数已使用完）\\
+\hline
+110& 不在发送时间内\\
+\hline
+111& 超出该账户当月发送额度限制\\
+\hline
+112& 无此产品，用户没有订购该产品\\
+\hline
+113& extno格式错（非数字或者长度不对）\\
+\hline
+115& 自动审核驳回\\
+\hline
+116& 签名不合法，未带签名（用户必须带签名的前提下）\\
+\hline
+117& IP地址认证错,请求调用的IP地址不是系统登记的IP地址\\
+\hline
+118& 用户没有相应的发送权限\\
+\hline
+119& 用户已过期\\
+\hline
+\end{longtable}
+
+
+\section{注意事项}
+
+用户群发短信如果有审核的限制，则客户的短信必须经过管理人员的审核，审核通过后才能被提交到行业网关进行短信实际发送。
+
+用户群发短信必须满足手机号码最低个数的限制，低于系统设定的群发最小手机号码数，则该提交请求会被拒绝，响应码为108。
+
+
+\section{短信发送例子}
+
+
+{\noindent http://222.73.117.158/msg/HttpBatchSendSM?account=jiekou-clcs-08\&pswd=Tch123456\&mobile=}
+
+{\noindent 18916626442\&msg=【萌萌搭】尊敬的用户您好，您的注册验证码是：1131，请完成注册\&needstatus=true}
+
+其中，这里的IP地址222.73.117.158需要根据系统部署的实际地址填写。
+
+\chapter{状态报告推送}
+
+如果管理员设置用户账户需要状态报告，并且也配置了账户的状态报告接收地址，则用户可以接收到其发送短信的状态报告。用户侧启动一个HTTP服务用于接收状态报告。
+
+
+\section{参数定义}
+
+
+
+\begin{longtable}{|m{25pt}|m{50pt}|m{300pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+序号&参数&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{状态报告参数定义}\\
+\hline
+序号&参数&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+1&receiver&接收状态报告验证的用户名（不是账户名），是按照用户要求配置的名称，可以为空\\
+\hline
+2&pswd&接收状态报告验证的密码，可以为空\\
+\hline
+3&msgid&提交短信时平台返回的msgid，参见短信提交后返回的响应码\\
+\hline
+4&reportTime&格式YYMMDDhhmm，其中YY=年份的最后两位（00-99），MM=月份（01-12），DD=日（01-31），hh=小时（00-23），mm=分钟（00-59）\\
+\hline
+5&mobile&单一的手机号码\\
+\hline
+6&status&状态报告数值\\
+\hline
+\end{longtable}
+
+
+\section{状态报告值}
+
+状态报告的值即status后面的数据，如下表所示：
+
+
+\begin{longtable}{|m{90pt}|m{250pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+状态值(字符串)&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{状态报告值}\\
+\hline
+状态值(字符串)&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+DELIVRD&短消息转发成功\\
+\hline
+EXPIRED&短消息超过有效期\\
+\hline
+UNDELIV&短消息是不可达的\\
+\hline
+UNKNOWN&未知短消息状态\\
+\hline
+REJECTD&短消息被短信中心拒绝\\
+\hline
+DTBLACK&目的号码是黑名单号码\\
+\hline
+ERR:104&系统忙\\
+\hline
+REJECT&审核驳回\\
+\hline
+其他&网关内部状态\\
+\hline
+\end{longtable}
+
+
+\section{示例}
+
+
+{\noindent \url{http://pushUrl?receiver=admin\&pswd=12345\&msgid=12345\&reportTime=1012241002
+
+\&mobile=18916626442\&status=DELIVRD
+}
+}
+
+其中，pushUrl为用户启动的服务地址。
+
+%\chapter{短信接收}
+%\section{参数定义}
+%\section{示例}
+
+
+\chapter{额度查询接口}
+
+
+\section{接口地址}
+
+\url{http://IP:PORT/msg/QueryBalance}
+
+其中IP:PORT为服务部署的地址和端口。
+
+IP为222.73.117.158，PORT默认为80。
+
+
+\section{参数定义}
+
+
+\begin{longtable}{|m{25pt}|m{50pt}|m{300pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+序号&参数&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{额度查询接口参数定义}\\
+\hline
+序号&参数&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+1&account&必填参数。用户账号\\
+\hline
+2&pswd&必填参数。用户密码\\
+\hline
+\end{longtable}
+
+
+\section{提交响应}
+
+\begin{lstlisting}[xleftmargin=.5in]
+20130303180000,0
+1234567,1000
+1234531,2000
+\end{lstlisting}
+
+第一行显示返回额度时的时间，提交响应值。
+
+第二行开始，每一行显示一个产品ID及其额度，有多少个产品显示多少行。
+
+
+\section{提交响应值}
+
+
+\begin{longtable}{|m{90pt}|m{250pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+状态值(字符串)&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{提交响应值}\\
+\hline
+状态值(字符串)&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+0&成功\\
+\hline
+101&无此用户\\
+\hline
+102&密码错\\
+\hline
+103&查询过快（30秒查询一次）\\
+\hline
+\end{longtable}
+
+\section{示例}
+
+
+\url{http://222.73.117.158/msg/QueryBalance?account=111111&pswd=123456}
+
+
+
+\chapter{充值接口}
+
+
+
+
+\section{接口地址}
+
+\url{http://IP:PORT/msg/Recharge}
+
+其中IP:PORT为服务部署的地址和端口。
 
 IP为222.73.117.158，PORT默认为80.
 
+
 \section{参数定义}
-\section{短信提交响应}
-\subsection{格式说明}
-\subsection{示例}
-\subsection{响应状态值说明}
-\section{注意事项}
-\section{短信发送例子}
-\chapter{状态报告推送}
-\section{参数定义}
-\section{状态报告值}
-\section{示例}
-\chapter{短信接收}
-\section{参数定义}
-\section{示例}
-\chapter{额度查询接口}
-\section{接口地址}
-\section{参数定义}
+
+
+
+\begin{longtable}{|m{25pt}|m{50pt}|m{300pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+序号&参数&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{充值接口参数定义}\\
+\hline
+序号&参数&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+1&username&账号，线下约定\\
+\hline
+2&password&密码，内容为md5(username+secretkey+timestamp)。\newline secretkey线下约定\\
+\hline
+3&timestamp&时间戳，格式:yyyyMMddHHmmss，如20130408145521\\
+\hline
+4&operator&操作人员\\
+\hline
+5&account&充值账号（即平台中的用户名）,des加密后base64编码，特殊符号需使用URLEncode。\newline des密钥线下约定\\
+\hline
+6&fee&充值金额（正整数）\\
+\hline
+7&type&充值类型（1、增加；2、扣除）\\
+\hline
+8&productid&本参数可选。接口中携带本参数，则平台对用户进行产品预定购和订购，将所有金额换算为该产品的条数。\newline 产品id只能带一个。\\
+\hline
+\end{longtable}
+
+
+
 \section{提交响应}
+
+\begin{lstlisting}[xleftmargin=.5in]
+20130303180000,0
+\end{lstlisting}
+
+显示返回响应的时间，提交响应值。
+
 \section{提交响应值}
+
+
+状态报告的值即status后面的数据，如下表所示：
+
+
+\begin{longtable}{|m{90pt}|m{250pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+代码&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{提交响应值}\\
+\hline
+代码&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+0&成功\\
+\hline
+201&缺少参数\\
+\hline
+202&校验失败，账号、密码、IP、时间戳错\\
+\hline
+203&充值账号不存在\\
+\hline
+204&金额不足，无法扣除\\
+\hline
+205&参数格式错\\
+\hline
+206&产品ID不存在\\
+\hline
+\end{longtable}
+
+
 \section{示例}
-\chapter{充值接口}
-\section{接口地址}
-\section{参数定义}
-\section{提交响应}
-\section{提交响应值}
-\section{示例}
+
+
+\url{http://222.73.117.158/msg/Recharge?username=123456&password=}
+
+
+\url{4725ff06026bc3c703736aa9a2a15e50&timestamp=20130408105900&}
+
+\url{operator=user1&account=LW4Zjb8dOww%3D&fee=1000&type=1}
+
+
+账号是123456，密码是123456，时间戳是20130408105900，操作人员是user1，充值账号是jishu01，des密钥是12345678，充值金额是1000元，类型为增加。
+
+DES加密方式为：DES/CBC/PKCS5Padding。Jishu01加密后的值是LW4Zjb8dOww=，使用Get方式提交时需要进行URLEncode。
+
+
+
+
 \chapter{开户接口}
+
+
 \section{接口地址}
+
+\url{http://IP:PORT/msg/UserManage}
+
+
+
+
 \section{参数定义}
+
+
+
+\begin{longtable}{|m{25pt}|m{65pt}|m{280pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+序号&参数&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{开户接口参数定义}\\
+\hline
+序号&参数&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+1&username&账号，线下约定,本次操作的用户名\\
+\hline
+2&password&密码，内容为md5(username+secretkey+timestamp)，secretkey线下约定\\
+\hline
+3&timestamp&时间戳，格式:yyyyMMddHHmmss，如20130408145521\\
+\hline
+4&operator&操作人员\\
+\hline
+5&action&增加、删除用户信息 0-增加 1-删除\\
+\hline
+6&account&增加的用户名账号（即平台中的用户名）,des加密后base64编码，特殊符号需使用URLEncode，des密钥线下约定\\
+\hline
+7&ac\_password&用户密码，密码强度需符合平台现有强度规定。\newline 该字段需要加密，加密方式同account字段\\
+\hline
+8&type&用户类型，1-普通用户，2-代理商\\
+\hline
+9&true\_name&企业名称\\
+\hline
+10&contact\_mobile&联系人电话\\
+\hline
+11&send\_hour&发送时段，开始时段和结束时段，使用逗号分隔，例如：8,21\\
+\hline
+12&need\_audit&是否需要审核  1-是 0 –否\\
+\hline
+13&send\_type&发送权限：H：单发接口 B：群发接口 W：WEB发送 V:变量短信接口 P：群发包接口。\newline 
+如：BW表示用户有群发接口和WEB发送权限，HBV表示用户有群发、单发、变量短信接口权限\\
+\hline
+14&need\_reportmo&是否需要状态报告和MO。0 – 不需要 1- 需要\\
+\hline
+15&extno&扩展码\\
+\hline
+16&signature&签名\\
+\hline
+17&fee\_back&是否自动返回额度0 –否 1 –是\\
+\hline
+18&force\_signature&用户自己签名的前提下，是否检查签名。1-是，0-否\\
+\hline
+19&anti\_phshing&是否实施反钓鱼策略 0 –否 1 –是\\
+\hline
+20&self\_subscribe&是否可以自订购 0 –否 1 –是\\
+\hline
+21&product\_list&预订购产品列表，内容为以逗号分隔的productid,例如 10001101,100002210 表明用于预定购了10001101 及100002210两个产品\\
+\hline
+22&web\_client\_ip&WEB登录绑定地址\\
+\hline
+23&http\_client\_ip&接口调用绑定地址\\
+\hline
+24&sms\_check&是否使用登录短信校验码0 –否 1 –是\\
+\hline
+25&expired\_date&用户账号过期日期，格式yyyyMMdd\\
+\hline
+\end{longtable}
+
+新增和修改用户时，用户信息字段都需要。删除用户时只需要account字段。
+
 \section{提交响应}
+
+\begin{lstlisting}[xleftmargin=.5in]
+20130303180000,305，密码格式错误
+\end{lstlisting}
+
+显示返回响应的时间，提交响应值，错误描述。
+
+\begin{lstlisting}[xleftmargin=.5in]
+20130303180000,0
+\end{lstlisting}
+
+响应值为0时没有错误描述。内容编码为UTF-8编码。
+
+
+
+
 \section{提交响应值}
+
+
+\begin{longtable}{|m{90pt}|m{250pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+状态值(字符串)&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{提交响应值}\\
+\hline
+状态值(字符串)&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+0&成功\\
+\hline
+301&缺少参数\\
+\hline
+302&校验失败，账号、密码、IP、时间戳错\\
+\hline
+303&删除时用户不存在/开户时用户已存在\\
+\hline
+304&扩展码已存在\\
+\hline
+305&参数错\\
+\hline
+306&产品不存在\\
+\hline
+\end{longtable}
+
 \chapter{附录}
 
+变量短信接口：
 
-\part{SMS}
+http://222.73.117.158/msg/HttpVarSM?account=lanren\&pswd=Lr123123
+
+\&msg=【懒人旅行】尊敬的懒人旅行会员，您于\{\$var\}预订的\{\$var\}，\{\$var\}张，订单号：\{\$var\}已取消成功，如非本人操作，欢迎致电39990411咨询。\&params=13641892268,2015-01-01,成园温泉山庄门票,2,AC20150127\&needstatus=true
 
 
 
+\part{SMS API使用说明}
+
+
+\chapter{短信发送接口}
+
+短信发送接口，最多可以一次提交50000个手机号码。
+
+\begin{lstlisting}[language=Java]
+public static String batchSend(String uri, String account, String pswd, String mobiles, String content, boolean needstatus, String product, String extno) throws Exception
+\end{lstlisting}
+
+接口的参数：
+
+\begin{compactitem}
+\item uri 应用地址，类似于http://ip:port/msg/，如http://192.168.1.2/msg/
+\item account 账号
+\item pswd 密码
+\item mobiles 手机号码，多个号码使用","分割
+\item content 短信内容
+\item needstatus 是否需要状态报告，需要true，不需要false
+\item product 产品ID
+\item extno 扩展码，最多可以扩展6位
+\end{compactitem}
+
+接口的返回值定义参见《短信平台接口说明》
+
+\begin{lstlisting}[language=PHP]
+
+
+<?php
+session_start();
+function postSMS($mobiel,$data)
+{
+	$post_data = array();
+	$post_data['account'] = iconv('GB2312', 'GB2312',"jiekou-clcs-06");
+	$post_data['pswd'] = iconv('GB2312', 'GB2312',"Tch147369");
+	//$post_data['ContentType'] = iconv('GB2312', 'GB2312',"15");
+	$post_data['mobile'] = $mobiel;//iconv('GB2312', 'UTF-8',"15821162098");
+	$post_data['msg']=mb_convert_encoding("$data",'UTF-8', 'GB2312');//iconv('GB2312', 'UTF-8',"123456");
+	//$post_data['dtime'] = date("Y-m-d H:i:s");
+	//$post_data['submit'] = iconv('GB2312', 'UTF-8',"submit");
+	$url='http://222.73.117.158/msg/HttpBatchSendSM?';
+	$o="";
+	foreach ($post_data as $k=>$v)
+	{
+		$o.= "$k=".urlencode($v)."&";
+	}
+	$post_data=substr($o,0,-1);
+	//echo($post_data);
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_POST, 1);
+	curl_setopt($ch, CURLOPT_HEADER, 0);
+	curl_setopt($ch, CURLOPT_URL,$url);
+	//为了支持cookie
+	//curl_setopt($ch, CURLOPT_COOKIEJAR, 'cookie.txt');
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+	$result = curl_exec($ch);
+	curl_close($ch);
+}
+$phone=$_POST["phone"];
+echo $phone;
+if(empty($phone)){
+	echo "no";
+}
+else 
+{
+	$code=rand(10000,99999);
+	$data="你好，验证码为：".$code;
+	postSMS($phone,$data);
+}
+?>
+\end{lstlisting}
+
+
+\section{PHP}
+
+\begin{lstlisting}[language=PHP]
+//1.生成随机数
+$code = rand(100000,999999);
+$data ="您好！验证码是：" . $code ;
+$_SESSION['code'] = $code;
+
+ //2.发送短信
+$post_data = array();
+$post_data['account'] = iconv('GB2312', 'GB2312',"询问对接人");
+$post_data['pswd'] = iconv('GB2312', 'GB2312',"询问对接人");
+$post_data['mobile'] =”1390000000”;
+$post_data['msg']=mb_convert_encoding("$data",'UTF-8', 'auto');
+$url='http://222.73.117.158/msg/HttpBatchSendSM?'; 
+$o="";
+foreach ($post_data as $k=>$v)
+{
+   $o.= "$k=".urlencode($v)."&";
+}
+$post_data=substr($o,0,-1);
+ 
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_HEADER, 0);
+curl_setopt($ch, CURLOPT_URL,$url);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+$result = curl_exec($ch);
+
+//3.验证功能
+ 	$phone =trim($_POST['phone']);
+	$code = $_POST['code'];
+ 
+if ( empty( $phone )  || empty( $code ) )
+{
+  Echo "<script language=javascript>alert('输入不完整!');history.back(1);</script>" ;
+}
+if ($code!=$_SESSION['code'])
+{
+  Echo "<script language=javascript>alert('验证码错误!');history.back(1);</script>" ;
+}
+\end{lstlisting}
+
+\section{Java}
+
+\begin{lstlisting}[language=Java]
+import com.bcloud.msg.http.HttpSender;
+
+public class HttpSenderTest {
+
+	public static void main(String[] args) {
+		String uri = "http://222.73.117.158/msg/";//应用地址
+		String account = "询问对接人";//账号
+		String pswd = "询问对接人";//密码
+		String mobiles = "13800210021,13800138000";//手机号码，多个号码使用","分割
+		String content = "亲爱的用户，您的验证码是123456，5分钟内有效。";//短信内容
+		boolean needstatus = true;//是否需要状态报告，需要true，不需要false
+		String product = null;//产品ID
+		String extno = null;//扩展码
+		 
+		try {
+			String returnString = HttpSender.batchSend(uri, account, pswd, mobiles, content, needstatus, product, extno);
+			System.out.println(returnString);
+			//TODO 处理返回值,参见HTTP协议文档
+		} catch (Exception e) {
+			//TODO 处理异常
+			e.printStackTrace();
+		}
+	}
+}
+\end{lstlisting}
 
 \end{document}
