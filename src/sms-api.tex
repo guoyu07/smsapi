@@ -70,7 +70,7 @@
     %language=XX,
     xleftmargin=2em,
     backgroundcolor=\color{white},
-    basicstyle=\ttfamily,
+    basicstyle=\ttfamily\small,
     keywordstyle=\bfseries,
     commentstyle=\rmfamily\itshape,
     stringstyle=\color{pred}\ttfamily,
@@ -3204,7 +3204,7 @@ REJECT&审核驳回\\
 %\section{示例}
 
 
-\chapter{额度查询接口}
+\chapter{额度查询}
 
 
 \section{接口地址}
@@ -3625,7 +3625,7 @@ public static String batchSend(String uri, String account, String pswd, String m
 接口的参数：
 
 \begin{compactitem}
-\item uri 应用地址，类似于http://ip:port/msg/，如http://192.168.1.2/msg/
+\item uri 应用地址，类似于http://ip:port/msg/（例如http://192.168.1.2/msg/）
 \item account 账号
 \item pswd 密码
 \item mobiles 手机号码，多个号码使用","分割
@@ -3687,6 +3687,48 @@ else
 
 \section{PHP}
 
+短信发送接口的示例如下：
+
+\begin{lstlisting}[language=PHP]
+/*@api PHP对接短信接口
+* 
+*/
+class api{
+function __contruct(){
+	// 设置短信验证码
+	$code=rand(100000,000000);
+	$data="您好，您的验证码是" . $code;
+	// 发送短信
+	$post_data=array();
+	$post_data['account'] = 'jiekou-clcs-08'; // 发送短信的用户帐号
+	$post_data['pswd']='Tch123456'; // 发送短信的用户密码
+	$post_data['mobile']='18916626442'; // 
+	$post_data['needstatus']='true'; // 需要状态报告
+	
+	$post_data['msg']=mb_convert_encoding($data,'UTF-8','UTF-8');
+	$url='http://222.73.117.158/msg/HttpBatchSendSM?';
+	$o="";
+	foreach($post_data as $k=>$key){
+		$o.="$k=".urlencode($v)."&";
+	}
+	$post_data=substr($o,0,-1);
+	
+	$ch=curl_init();
+	
+	curl_setopt($ch, CURLOPT_POST,1);
+	curl_setopt($ch, CURLOPT_HEADER,0);
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //屏蔽界面输出
+	$result=curl_exec($ch);
+	echo $result;
+	}
+}
+
+$api = new api(); //调用api
+\end{lsltisting}
+
+
+
 \begin{lstlisting}[language=PHP]
 //1.生成随机数
 $code = rand(100000,999999);
@@ -3697,7 +3739,7 @@ $_SESSION['code'] = $code;
 $post_data = array();
 $post_data['account'] = iconv('GB2312', 'GB2312',"询问对接人");
 $post_data['pswd'] = iconv('GB2312', 'GB2312',"询问对接人");
-$post_data['mobile'] =”1390000000”;
+$post_data['mobile'] =”18916626442”;
 $post_data['msg']=mb_convert_encoding("$data",'UTF-8', 'auto');
 $url='http://222.73.117.158/msg/HttpBatchSendSM?'; 
 $o="";
@@ -3715,16 +3757,16 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
 $result = curl_exec($ch);
 
 //3.验证功能
- 	$phone =trim($_POST['phone']);
-	$code = $_POST['code'];
+$phone =trim($_POST['phone']);
+$code = $_POST['code'];
  
 if ( empty( $phone )  || empty( $code ) )
 {
-  Echo "<script language=javascript>alert('输入不完整!');history.back(1);</script>" ;
+	Echo "<script language=javascript>alert('输入不完整!');history.back(1);</script>" ;
 }
 if ($code!=$_SESSION['code'])
 {
-  Echo "<script language=javascript>alert('验证码错误!');history.back(1);</script>" ;
+	Echo "<script language=javascript>alert('验证码错误!');history.back(1);</script>" ;
 }
 \end{lstlisting}
 
@@ -3756,5 +3798,37 @@ public class HttpSenderTest {
 	}
 }
 \end{lstlisting}
+
+
+\section{AJAX}
+
+
+\begin{lstlisting}[language=bash]
+<script>
+var xmlhttp=window.XMLHttpRequest?new XMLHttpRequest() : new ActiveObject("Microsoft.XMLHttp");
+
+// 添加参数,以求每次访问不同的url,以避免缓存问题
+xmlhttp.open("get",encodeURI("http://222.73.117.158/msg/HttpBatchSendSM?
+account=jiekou-clcs-08&pswd=Tch123456&mobile=18916626442&msg=你好，你的验证码是：1234"));
+
+xmlHttp.onreadystatechange=function(){
+	if(xmlHttp.readyState == 4 && xmlHttp.status == 200){
+		document.getElementById("result").innerHTML = xmlHttp.responseText;
+	}
+}
+// 发送请求,参数为null
+xmlHttp.send(null);
+</script>
+\end{lstlisting}
+
+
+\section{Python}
+
+\begin{lstlisting}[language=Python]
+
+\end{lstlisting}
+
+
+
 
 \end{document}
